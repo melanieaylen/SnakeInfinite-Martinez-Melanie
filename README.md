@@ -30,6 +30,7 @@
 ### Clonar repositorio
 ```
 1. Abrir Git Bash
+
 2.Navegar hasta la carpeta donde queres guardar el proyecto con el comando cd. Por ejemplo:
 cd /c/Users/TuUsuario/Documentos
 
