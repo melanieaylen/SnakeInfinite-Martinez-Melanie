@@ -28,15 +28,19 @@
 ## 🚀 Cómo Clonar el repositorio y ejecutar el programa
 
 ### Clonar repositorio
-```1. Abrir Git Bash
-   2.Navegar hasta la carpeta donde queres guardar el proyecto con el comando cd. Por ejemplo:
-        cd /c/Users/TuUsuario/Documentos
-   3.Clonar el repositorio con el siguiente comando: 
-        git clone https://github.com/melanieaylen/SnakeInfinite-Martinez-Melanie.git
-   4.Acceder a la carpeta del proyecto_
-        cd SnikeInfinite
-   5.Verificar el estado del repositorio:
-        git status
+```
+1. Abrir Git Bash
+2.Navegar hasta la carpeta donde queres guardar el proyecto con el comando cd. Por ejemplo:
+cd /c/Users/TuUsuario/Documentos
+
+3.Clonar el repositorio con el siguiente comando: 
+git clone https://github.com/melanieaylen/SnakeInfinite-Martinez-Melanie.git
+
+4.Acceder a la carpeta del proyecto_
+cd SnikeInfinite
+
+5.Verificar el estado del repositorio:
+git status
 ```
 
 ### 🧰 Importar el proyecto en Eclipse
@@ -57,6 +61,7 @@
 10. Abrí la carpeta `SnakeInfinite-lwjgl3` → `src/main/java` → `mi.juego.snake.lwjgl3`.  
    Luego, abrí la clase `Lwjgl3Launcher.java`.
 <img width="249" height="311" alt="image" src="https://github.com/user-attachments/assets/fd2b373e-5d09-4ee6-9b08-a0f213e327ba" />
+
 Hacé clic derecho y seleccioná **Run As** → **1 Java Application**.
 
 
