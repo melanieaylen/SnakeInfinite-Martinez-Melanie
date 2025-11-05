@@ -1,53 +1,57 @@
 package pantallas;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
-import elementos.Imagen;
-import utiles.Recursos;
+import elementos.Serpiente;
+import utiles.Config;
 import utiles.Render;
 
-public class PantallaJuego implements Screen{
+public class PantallaJuego implements Screen {
 
-	private Imagen fondo;
+	private Serpiente serpiente;
+	private final int ANCHO = 20, ALTO = 20;
+
 	@Override
 	public void show() {
-		fondo = new Imagen(Recursos.FONDO_JUEGO);
+		serpiente = new Serpiente();
+		serpiente.setAncho(ANCHO);
+		serpiente.setAlto(ALTO);
+		serpiente.setPosX((Config.ANCHO / 2) - (ANCHO / 2));
+		serpiente.setPosY((Config.ALTO / 2) - (ALTO / 2));
+		System.out.println("Config ANCHO: " + Config.ANCHO + ", ALTO: " + Config.ALTO);
+		System.out.println("Real ANCHO: " + Gdx.graphics.getWidth() + ", ALTO: " + Gdx.graphics.getHeight());
 	}
 
 	@Override
 	public void render(float delta) {
-		Render.batch.begin();
-		fondo.dibujar();
-		Render.batch.end();
+		Render.limpiarPantalla(1, 1, 1);
+		Render.begin();
+		Render.end();
+		Render.shaper.begin(ShapeType.Filled);
+		serpiente.dibujar();
+		Render.shaper.end();
 	}
 
 	@Override
 	public void resize(int width, int height) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void pause() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void resume() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void hide() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void dispose() {
-	
 	}
 
 }

@@ -2,6 +2,7 @@ package mi.juego.snake.lwjgl3;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+
 import mi.juego.snake.Principal;
 import utiles.Config;
 
@@ -22,7 +23,7 @@ public class Lwjgl3Launcher {
         configuration.useVsync(true);
         configuration.setForegroundFPS(Lwjgl3ApplicationConfiguration.getDisplayMode().refreshRate + 1);
 
-        configuration.setWindowedMode(Config.ALTO, Config.ANCHO);
+        configuration.setWindowedMode(Config.ANCHO, Config.ALTO);
         configuration.setWindowIcon("otros/icono.png");
         configuration.setResizable(false);
 

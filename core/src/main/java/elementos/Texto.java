@@ -6,34 +6,45 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 
-import utiles.Recursos;
 import utiles.Render;
 
 public class Texto {
-	private BitmapFont fuente; 	
-	
-	public Texto(int dimension, Color colorLetra, Color colorSombra, int sombraX, int sombraY, boolean borde) {		
-	generarTexto(dimension, colorLetra, colorSombra, sombraX, sombraY, borde);
+	private BitmapFont fuente;
+
+	public Texto(String rutaFuente, int dimension, Color colorLetra, Color colorSombra, int sombraX, int sombraY,
+			boolean borde) {
+		generarTexto(rutaFuente, dimension, colorLetra, colorSombra, sombraX, sombraY, borde);
 	}
 	
-	private void generarTexto(int dimension, Color colorLetra, Color colorSombra, int sombraX, int sombraY, boolean borde) {
-		FreeTypeFontGenerator generador = new FreeTypeFontGenerator(Gdx.files.internal(Recursos.FUENTE));
+	private void generarTexto(String rutaFuente, int dimension, Color colorLetra, Color colorSombra, int sombraX, int sombraY,
+			boolean borde) {
+		FreeTypeFontGenerator generador = new FreeTypeFontGenerator(Gdx.files.internal(rutaFuente));
 		FreeTypeFontParameter parametros = new FreeTypeFontGenerator.FreeTypeFontParameter();
-		
+
 		parametros.size = dimension;
 		parametros.color = colorLetra;
 		parametros.shadowColor = colorSombra;
 		parametros.shadowOffsetX = sombraX;
 		parametros.shadowOffsetY = sombraY;
 
-		if(borde) {
+		if (borde) {
 			parametros.borderWidth = 1;
+			parametros.borderColor = Color.BLACK;
 		}
-		
+
 		fuente = generador.generateFont(parametros);
-	}	
+		generador.dispose();
+	}
+
+	public void setColor(Color color) {
+		fuente.setColor(color);
+	}
 	
-	public void dibujarTexto(String texto, int x, int y) {
-		fuente.draw(Render.batch, texto, x, y);
+	public void dibujarTexto(String texto, float anchoTexto, float altoTexto) {
+		fuente.draw(Render.batch, texto, anchoTexto, altoTexto);
+	}
+	
+	public void dispose() {
+		fuente.dispose();
 	}
 }
