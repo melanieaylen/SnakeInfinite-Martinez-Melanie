@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Color;
 import utiles.Render;
 
 public class Serpiente {
-//	private Imagen serpiente; 
 	private float posX = 0, posY = 0;
 	private int alto = 0, ancho = 0;
 
@@ -45,12 +44,4 @@ public class Serpiente {
 		Render.shaper.setColor(Color.BLACK);
 		Render.shaper.rect(posX, posY, ancho, alto);
 	}
-//	public Serpiente(float x, float y, float ancho, float alto) {
-//		serpiente = new Imagen(Recursos.ICONO);
-//		serpiente.setParametros(x, y, ancho, alto);
-//	}
-//	
-//	public void dibujar() {
-//		serpiente.dibujar();
-//	}
 }

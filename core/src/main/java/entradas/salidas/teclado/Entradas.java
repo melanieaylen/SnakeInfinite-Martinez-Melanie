@@ -7,13 +7,9 @@ import pantallas.PantallaMenu;
 
 public class Entradas implements InputProcessor {
 
-	public static boolean abajo = false, arriba = false, enter = false;
-	PantallaMenu app; 
+	public static boolean abajo = false, arriba = false, enter = false, izquierda = false, derecha = false;
 	
-	public Entradas(PantallaMenu app) {
-		this.app = app; 
-	}
-	
+	//getters y setters
 	public static boolean isEnter() {
 		return enter;
 	}
@@ -23,6 +19,7 @@ public class Entradas implements InputProcessor {
 	}
 
 	@Override
+	//SE PRESIONA LA TECLA
 	public boolean keyDown(int keycode) {
 		if(keycode == Keys.DOWN) {
 			abajo = true; 
@@ -35,6 +32,13 @@ public class Entradas implements InputProcessor {
 			enter = true; 
 		}
 		
+		if(keycode == Keys.LEFT) {
+			izquierda = true; 
+		}
+		
+		if (keycode == Keys.RIGHT) {
+			derecha = true; 
+		}
 		return false;
 	}
 
@@ -55,6 +59,7 @@ public class Entradas implements InputProcessor {
 	}
 
 	@Override
+	//SE ALZA LA TECLA 
 	public boolean keyUp(int keycode) {
 		if(keycode == Keys.DOWN) {
 			abajo = false; 
@@ -63,7 +68,35 @@ public class Entradas implements InputProcessor {
 		if(keycode == Keys.UP) {
 			arriba = false; 
 		}
+		
+		if(keycode == Keys.ENTER) {
+			enter = false; 
+		}
+		
+		if(keycode == Keys.LEFT) {
+			izquierda = false; 
+		}
+		
+		if(keycode == Keys.RIGHT) {
+			derecha = false; 
+		}
 		return false;
+	}
+
+	public static boolean isIzquierda() {
+		return izquierda;
+	}
+
+	public static void setIzquierda(boolean izquierda) {
+		Entradas.izquierda = izquierda;
+	}
+
+	public static boolean isDerecha() {
+		return derecha;
+	}
+
+	public static void setDerecha(boolean derecha) {
+		Entradas.derecha = derecha;
 	}
 
 	@Override
@@ -80,31 +113,26 @@ public class Entradas implements InputProcessor {
 
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean scrolled(float amountX, float amountY) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
