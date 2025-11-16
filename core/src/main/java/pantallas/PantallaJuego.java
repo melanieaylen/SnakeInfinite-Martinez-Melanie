@@ -1,13 +1,16 @@
 package pantallas;
 
-import com.badlogic.gdx.Screen;
 import java.util.Random;
 
+import com.badlogic.gdx.Screen;
+
 import elementos.Grilla;
+import elementos.Imagen;
 import elementos.Manzana;
 import elementos.Serpiente;
 import entradas.salidas.teclado.Entradas;
 import utiles.Config;
+import utiles.Recursos;
 import utiles.Render;
 
 public class PantallaJuego implements Screen {
@@ -22,6 +25,8 @@ public class PantallaJuego implements Screen {
 	private float posX = 0, posY = 0;
 	private float tiempo = 0;
 
+	private int puntuacion; 
+	
 	@Override
 	public void show() {
 		posX = (Config.ANCHO / 2f) - (tamanio / 2f);
@@ -32,18 +37,24 @@ public class PantallaJuego implements Screen {
 		random = new Random();
 
 		manzana = new Manzana(posX + 40, posY + 40, tamanio, tamanio);
+		
 	}
 
 	@Override
 	public void render(float delta) {
 		Render.limpiarPantalla(1, 1, 1);
+		Render.batch.begin();
+		Render.batch.end();
+		
 		procesarEntradas(delta);
 
 		if(colisionConManzana()) {
 			serpiente.crecer();
 			moverManzanaAleatoria();
+			puntuacion += 10; 
 		}
-
+	
+		System.out.println("Puntuacion" + puntuacion);
 		manzana.dibujar();
 		serpiente.dibujar();
 		grilla.dibujar();
@@ -74,20 +85,27 @@ public class PantallaJuego implements Screen {
 	}
 
 	private void moverManzanaAleatoria() {
-		// Calcular cuántas celdas caben en la pantalla
-		int celdasX = Config.ANCHO / tamanio;
-		int celdasY = Config.ALTO / tamanio;
-		
-		// Generar posición aleatoria en la grilla
-		int celdaX = random.nextInt(celdasX);
-		int celdaY = random.nextInt(celdasY);
-		
-		// Convertir a coordenadas de píxeles
-		float nuevaX = celdaX * tamanio;
-		float nuevaY = celdaY * tamanio;
-		
-		manzana.setPosX(nuevaX);
-		manzana.setPosY(nuevaY);
+	    // Obtener el margen de la grilla
+	    int margen = grilla.getMargen();
+	    
+	    // Calcular el área jugable (sin los márgenes)
+	    int areaJugableAncho = Config.ANCHO - (2 * margen);
+	    int areaJugableAlto = Config.ALTO - (2 * margen);
+	    
+	    // Calcular cuántas celdas caben en el área jugable
+	    int celdasX = areaJugableAncho / tamanio;
+	    int celdasY = areaJugableAlto / tamanio;
+	    
+	    // Generar posición aleatoria dentro de la grilla
+	    int celdaX = random.nextInt(celdasX);
+	    int celdaY = random.nextInt(celdasY);
+	    
+	    // Convertir a coordenadas de píxeles (sumando el margen)
+	    float nuevaX = margen + (celdaX * tamanio);
+	    float nuevaY = margen + (celdaY * tamanio);
+	    
+	    manzana.setPosX(nuevaX);
+	    manzana.setPosY(nuevaY);
 	}
 
 	@Override
