@@ -49,19 +49,22 @@ public class PantallaMenu implements Screen {
 		Render.limpiarPantalla(0, 0, 0);
 		procesarEntradas(delta);
 		actualizarInterfaz();
-		Render.begin();
+
+		Render.batch.begin();
 		menu.dibujar();
 		serpiente.dibujar();
+		
 		titulo.dibujarTexto("Snake Infinite", 245, 780);
 		subtitulo1.dibujarTexto("   Un Jugador", 468, 520);
 		subtitulo2.dibujarTexto("   Multijugador", 448, 410);
+		
 		if (opc == 1) {
 			opcionElegida.dibujarTexto("> ", 458, 520);
 
 		} else if (opc == 2) {
 			opcionElegida.dibujarTexto("> ", 440, 410);
 		}
-		Render.end();
+		Render.batch.end();
 	}
 
 	private void procesarEntradas(float delta) {

@@ -25,5 +25,9 @@ public class Render {
 	public static void end() {
 		batch.end();
 	}
+	
+	public static void dispose() {
+		batch.dispose();
+	}
 
 }

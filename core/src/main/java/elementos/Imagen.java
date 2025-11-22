@@ -25,5 +25,9 @@ public class Imagen {
 	public void setTransparencia(float a) {
 		sprite.setAlpha(a);
 	}
+	
+	public void dispose() {
+		textura.dispose();
+	}
 
 }

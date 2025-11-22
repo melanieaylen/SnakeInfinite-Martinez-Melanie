@@ -2,7 +2,9 @@ package pantallas;
 
 import java.util.Random;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import elementos.Grilla;
 import elementos.Imagen;
@@ -24,90 +26,136 @@ public class PantallaJuego implements Screen {
 	private int tamanio = 20;
 	private float posX = 0, posY = 0;
 	private float tiempo = 0;
+	 
+	private Direcciones direccionActual = Direcciones.NINGUNA;
 
-	private int puntuacion; 
-	
+	private Imagen fondo;
+
 	@Override
 	public void show() {
 		posX = (Config.ANCHO / 2f) - (tamanio / 2f);
 		posY = (Config.ALTO / 2f) - (tamanio / 2f);
 
-		serpiente = new Serpiente(posX, posY, tamanio, tamanio);
 		grilla = new Grilla(tamanio);
+		serpiente = new Serpiente(posX, posY, tamanio, tamanio);
 		random = new Random();
-
 		manzana = new Manzana(posX + 40, posY + 40, tamanio, tamanio);
+		fondo = new Imagen(Recursos.FONDO_JUEGO);
 		
+		Gdx.input.setInputProcessor(entrada);
 	}
 
 	@Override
 	public void render(float delta) {
 		Render.limpiarPantalla(1, 1, 1);
 		Render.batch.begin();
+		fondo.dibujar();
+		grilla.dibujarFondoGrilla();
 		Render.batch.end();
 		
+		Render.shaper.begin(ShapeType.Line);
+		grilla.dibujarGrilla();
+		Render.shaper.end();
+		
 		procesarEntradas(delta);
-
-		if(colisionConManzana()) {
+		if (colisionConManzana()) {
 			serpiente.crecer();
 			moverManzanaAleatoria();
-			puntuacion += 10; 
 		}
-	
-		System.out.println("Puntuacion" + puntuacion);
+		
+		Render.shaper.begin(ShapeType.Filled);
+		if (serpiente.colisionSerpiente() || colisionBordes()) {
+			Render.app.setScreen(new GameOver());
+		}else {
+			serpiente.dibujar();
+		}
 		manzana.dibujar();
-		serpiente.dibujar();
-		grilla.dibujar();
+		Render.shaper.end();
 	}
 
 	private void procesarEntradas(float delta) {
-		tiempo += delta;
+		if (entrada.isArriba() && direccionActual != Direcciones.ABAJO) {
+			direccionActual = Direcciones.ARRIBA;
+		} else if (entrada.isAbajo() && direccionActual != Direcciones.ARRIBA) {
+			direccionActual = Direcciones.ABAJO;
+		} else if (entrada.isDerecha() && direccionActual != Direcciones.IZQUIERDA) {
+			direccionActual = Direcciones.DERECHA;
+		} else if (entrada.isIzquierda() && direccionActual != Direcciones.DERECHA) {
+			direccionActual = Direcciones.IZQUIERDA;
+		}
 
+		moverSerpiente(delta);
+	}
+
+	private void moverSerpiente(float delta) {
+		tiempo += delta;
 		if (tiempo > 0.1f) {
 			tiempo = 0;
-			if (entrada.isArriba()) {
+
+			switch (direccionActual) {
+			case ARRIBA:
 				posY += serpiente.getAlto();
-			} else if (entrada.isAbajo()) {
+				break;
+
+			case ABAJO:
 				posY -= serpiente.getAlto();
-			} else if (entrada.isDerecha()) {
+				break;
+
+			case DERECHA:
 				posX += serpiente.getAncho();
-			} else if (entrada.isIzquierda()) {
+				break;
+
+			case IZQUIERDA:
 				posX -= serpiente.getAncho();
+				break;
+
+			case NINGUNA:
+				break;
+
+			default:
+				break;
+
 			}
-			// MOVER SOLO CUANDO PASA EL TIEMPO
 			serpiente.mover(posX, posY);
 		}
 	}
 
 	private boolean colisionConManzana() {
-		return (manzana.getPosX() == serpiente.getPosX()) && 
-		       (manzana.getPosY() == serpiente.getPosY());
+		return (manzana.getPosX() == serpiente.getPosX()) && (manzana.getPosY() == serpiente.getPosY());
 	}
 
 	private void moverManzanaAleatoria() {
-	    // Obtener el margen de la grilla
-	    int margen = grilla.getMargen();
-	    
-	    // Calcular el área jugable (sin los márgenes)
-	    int areaJugableAncho = Config.ANCHO - (2 * margen);
-	    int areaJugableAlto = Config.ALTO - (2 * margen);
-	    
-	    // Calcular cuántas celdas caben en el área jugable
-	    int celdasX = areaJugableAncho / tamanio;
-	    int celdasY = areaJugableAlto / tamanio;
-	    
-	    // Generar posición aleatoria dentro de la grilla
-	    int celdaX = random.nextInt(celdasX);
-	    int celdaY = random.nextInt(celdasY);
-	    
-	    // Convertir a coordenadas de píxeles (sumando el margen)
-	    float nuevaX = margen + (celdaX * tamanio);
-	    float nuevaY = margen + (celdaY * tamanio);
-	    
-	    manzana.setPosX(nuevaX);
-	    manzana.setPosY(nuevaY);
+		int margen = grilla.getMargen();
+
+		int areaJugableAncho = Config.ANCHO - (2 * margen);
+		int areaJugableAlto = Config.ALTO - (2 * margen);
+
+		int celdasX = areaJugableAncho / tamanio;
+		int celdasY = areaJugableAlto / tamanio;
+
+		int celdaX = random.nextInt(celdasX);
+		int celdaY = random.nextInt(celdasY);
+
+		float nuevaX = margen + (celdaX * tamanio);
+		float nuevaY = margen + (celdaY * tamanio);
+
+		manzana.setPosX(nuevaX);
+		manzana.setPosY(nuevaY);
 	}
 
+	private boolean colisionBordes() {
+		int margen = grilla.getMargen();
+		float serpienteX = serpiente.getPosX(), serpienteY = serpiente.getPosY();
+		boolean colision = false; 
+		
+		if(serpienteX < margen || serpienteX >= Config.ANCHO - margen || serpienteY < margen || serpienteY >= Config.ALTO - margen) {
+			colision = true; 
+		}
+		
+		return colision;
+	}
+	
+	
 	@Override
 	public void resize(int width, int height) {
 	}
@@ -126,6 +174,8 @@ public class PantallaJuego implements Screen {
 
 	@Override
 	public void dispose() {
+		grilla.dispose();
+		fondo.dispose();
 	}
 
 }

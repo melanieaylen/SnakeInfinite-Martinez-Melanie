@@ -49,9 +49,7 @@ public class Manzana {
 	}
 
 	public void dibujar() {
-		Render.shaper.begin(ShapeType.Filled);
-		Render.shaper.setColor(Color.MAGENTA);
-		Render.shaper.rect(posX, posY, ancho, alto);
-		Render.shaper.end();
+		Render.shaper.setColor(Color.RED);
+		Render.shaper.rect(posX, posY, ancho - 1, alto - 1);
 	}
 }

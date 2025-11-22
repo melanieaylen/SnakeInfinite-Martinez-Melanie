@@ -7,15 +7,15 @@ import pantallas.PantallaMenu;
 
 public class Entradas implements InputProcessor {
 
-	public static boolean abajo = false, arriba = false, enter = false, izquierda = false, derecha = false;
+	public boolean abajo = false, arriba = false, enter = false, izquierda = false, derecha = false;
 	
 	//getters y setters
-	public static boolean isEnter() {
+	public boolean isEnter() {
 		return enter;
 	}
 
-	public static void setEnter(boolean enter) {
-		Entradas.enter = enter;
+	public void setEnter(boolean enter) {
+		this.enter = enter;
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class Entradas implements InputProcessor {
 		return false;
 	}
 
-	public static boolean isAbajo() {
+	public  boolean isAbajo() {
 		return abajo;
 	}
 
@@ -83,20 +83,20 @@ public class Entradas implements InputProcessor {
 		return false;
 	}
 
-	public static boolean isIzquierda() {
+	public boolean isIzquierda() {
 		return izquierda;
 	}
 
-	public static void setIzquierda(boolean izquierda) {
-		Entradas.izquierda = izquierda;
+	public void setIzquierda(boolean izquierda) {
+		this.izquierda = izquierda;
 	}
 
-	public static boolean isDerecha() {
+	public boolean isDerecha() {
 		return derecha;
 	}
 
-	public static void setDerecha(boolean derecha) {
-		Entradas.derecha = derecha;
+	public void setDerecha(boolean derecha) {
+		this.derecha = derecha;
 	}
 
 	@Override
