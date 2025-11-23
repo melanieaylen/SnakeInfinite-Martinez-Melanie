@@ -27,21 +27,24 @@ public class PantallaMenu implements Screen {
 	private int opc = 1;
 	private float tiempo = 0;
 
+	private int tamanioSubTexto = 50;
+	private int tamanioTexto = 120;
+
 	@Override
 	public void show() {
 		menu = new Imagen(Recursos.FONDO_MENU);
 		serpiente = new Imagen(Recursos.ICONO);
-		serpiente.setParametros(600, 150, 130, 130);
+		serpiente.setParametros(720, 140, 130, 130);
 
 		Gdx.input.setInputProcessor(entrada);
 
 		musica = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica.mp3"));
 		musica.play();
 
-		titulo = new Texto(Recursos.FUENTE, 120, Color.WHITE, Color.TEAL, -3, 3, false);
-		subtitulo1 = new Texto(Recursos.FUENTE, 50, Color.WHITE, Color.BLACK, -4, 4, true);
-		subtitulo2 = new Texto(Recursos.FUENTE, 50, Color.WHITE, Color.BLACK, -4, 4, true);
-		opcionElegida = new Texto(Recursos.FUENTE, 50, Color.SKY, Color.BLACK, -4, 4, true);
+		titulo = new Texto(Recursos.FUENTE, tamanioTexto, Color.WHITE, Color.TEAL, -3, 3, false);
+		subtitulo1 = new Texto(Recursos.FUENTE, tamanioSubTexto, Color.WHITE, Color.BLACK, -4, 4, true);
+		subtitulo2 = new Texto(Recursos.FUENTE, tamanioSubTexto, Color.WHITE, Color.BLACK, -4, 4, true);
+		opcionElegida = new Texto(Recursos.FUENTE, tamanioSubTexto, Color.SKY, Color.BLACK, -4, 4, true);
 	}
 
 	@Override
@@ -54,15 +57,15 @@ public class PantallaMenu implements Screen {
 		menu.dibujar();
 		serpiente.dibujar();
 		
-		titulo.dibujarTexto("Snake Infinite", 245, 780);
-		subtitulo1.dibujarTexto("   Un Jugador", 468, 520);
-		subtitulo2.dibujarTexto("   Multijugador", 448, 410);
-		
+		titulo.dibujarTexto("Snake Infinite", 330, 750);
+		subtitulo1.dibujarTexto("   Un Jugador", 580, 530);
+		subtitulo2.dibujarTexto("   Multijugador", 565, 400);
+
 		if (opc == 1) {
-			opcionElegida.dibujarTexto("> ", 458, 520);
+			opcionElegida.dibujarTexto("> ", 540, 530);
 
 		} else if (opc == 2) {
-			opcionElegida.dibujarTexto("> ", 440, 410);
+			opcionElegida.dibujarTexto("> ", 540, 400);
 		}
 		Render.batch.end();
 	}
@@ -107,6 +110,7 @@ public class PantallaMenu implements Screen {
 			subtitulo2.setColor(Color.SKY);
 		}
 	}
+
 	@Override
 	public void resize(int width, int height) {
 	}

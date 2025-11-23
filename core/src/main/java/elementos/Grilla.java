@@ -12,19 +12,24 @@ import utiles.Render;
 
 public class Grilla {
 	private int tamanioCelda;
-	private Color color;
 	private int margen;
 	private Imagen fondo; 
+	private int anchoJuego = 0, altoJuego = 0; 
+	private int cantCeldasX = 0, cantCeldasY = 0; 
 	
 	public Grilla(int tamanioCelda) {
 		this.tamanioCelda = tamanioCelda;
-		this.color = Color.DARK_GRAY;
-		this.margen = tamanioCelda * 3; // Margen de 2 celdas
+		margen = tamanioCelda * 2;
 		
 		fondo = new Imagen(Recursos.FONDO_GRILLA);
 		
-		int anchoJuego = Config.ANCHO - (margen * 2);
-		int altoJuego = Config.ALTO - (margen * 2);
+		//AREA REAL DEL JUEGO 
+		anchoJuego = Config.ANCHO - (margen * 2);
+		altoJuego = Config.ALTO - (margen * 2);
+		
+		//CANTIDAD DE CELDAS DE LA GRILLA 
+		cantCeldasX = anchoJuego / tamanioCelda; 
+		cantCeldasY = altoJuego / tamanioCelda; 
 		
 		fondo.setParametros(margen, margen, anchoJuego, altoJuego);
 	}
@@ -34,7 +39,7 @@ public class Grilla {
 	}
 	
 	public void dibujarGrilla() {
-		Render.shaper.setColor(color);
+		Render.shaper.setColor(Color.DARK_GRAY);
 		// VERTICAL 
 		for (int x = margen; x <= Config.ANCHO - margen; x += tamanioCelda) {
 			Render.shaper.line(x, margen, x, Config.ALTO - margen);
@@ -50,16 +55,28 @@ public class Grilla {
 		return margen;
 	}
 
-	public void setMargen(int margen) {
-		this.margen = margen;
-	}
-
 	public int getTamanioCelda() {
 		return tamanioCelda;
 	}
 	
 	public void setTamanioCelda(int tamanioCelda) {
 		this.tamanioCelda = tamanioCelda;
+	}
+	
+	public int getAnchoJuego() {
+		return anchoJuego; 
+	}
+	
+	public int getAltoJuego() {
+		return altoJuego; 
+	}
+	
+	public int getCeldasX() {
+		return cantCeldasX; 
+	}
+	
+	public int getCeldasY() {
+		return cantCeldasY; 
 	}
 	
 	public void dispose() {

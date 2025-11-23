@@ -17,31 +17,43 @@ import utiles.Render;
 
 public class PantallaJuego implements Screen {
 
+	// ELEMENTOS
 	private Serpiente serpiente;
-	private Entradas entrada = new Entradas();
 	private Grilla grilla;
 	private Manzana manzana;
-	private Random random;
 
-	private int tamanio = 20;
-	private float posX = 0, posY = 0;
+	// ENTRADAS
+	private Entradas entrada = new Entradas();
 	private float tiempo = 0;
-	 
 	private Direcciones direccionActual = Direcciones.NINGUNA;
 
+	// LOGICA
+	private Random random;
+
+	// DISEÑO Y CONFIGURACION
 	private Imagen fondo;
+	private int tamanioElementos = 30;
+	private float posElementosX = 0, posElementosY = 0;
 
 	@Override
 	public void show() {
-		posX = (Config.ANCHO / 2f) - (tamanio / 2f);
-		posY = (Config.ALTO / 2f) - (tamanio / 2f);
+		// AREA JUGABLE
 
-		grilla = new Grilla(tamanio);
-		serpiente = new Serpiente(posX, posY, tamanio, tamanio);
-		random = new Random();
-		manzana = new Manzana(posX + 40, posY + 40, tamanio, tamanio);
+		// INICIALIZACION
 		fondo = new Imagen(Recursos.FONDO_JUEGO);
-		
+		grilla = new Grilla(tamanioElementos);
+
+		int celdasCentroX = (grilla.getAnchoJuego() / tamanioElementos) / 2;
+		int celdasCentroY = (grilla.getAltoJuego() / tamanioElementos) / 2;
+
+		// Posición inicial en píxeles (centro del área jugable)
+		posElementosX = grilla.getMargen() + (celdasCentroX * tamanioElementos);
+		posElementosY = grilla.getMargen() + (celdasCentroY * tamanioElementos);
+
+		serpiente = new Serpiente(posElementosX, posElementosY, tamanioElementos, tamanioElementos);
+		manzana = new Manzana(posElementosX + (tamanioElementos * 4), posElementosY, tamanioElementos,tamanioElementos);
+		random = new Random();
+
 		Gdx.input.setInputProcessor(entrada);
 	}
 
@@ -52,21 +64,21 @@ public class PantallaJuego implements Screen {
 		fondo.dibujar();
 		grilla.dibujarFondoGrilla();
 		Render.batch.end();
-		
+
 		Render.shaper.begin(ShapeType.Line);
 		grilla.dibujarGrilla();
 		Render.shaper.end();
-		
+
 		procesarEntradas(delta);
 		if (colisionConManzana()) {
 			serpiente.crecer();
 			moverManzanaAleatoria();
 		}
-		
+
 		Render.shaper.begin(ShapeType.Filled);
 		if (serpiente.colisionSerpiente() || colisionBordes()) {
 			Render.app.setScreen(new GameOver());
-		}else {
+		} else {
 			serpiente.dibujar();
 		}
 		manzana.dibujar();
@@ -94,19 +106,19 @@ public class PantallaJuego implements Screen {
 
 			switch (direccionActual) {
 			case ARRIBA:
-				posY += serpiente.getAlto();
+				posElementosY += serpiente.getAlto();
 				break;
 
 			case ABAJO:
-				posY -= serpiente.getAlto();
+				posElementosY -= serpiente.getAlto();
 				break;
 
 			case DERECHA:
-				posX += serpiente.getAncho();
+				posElementosX += serpiente.getAncho();
 				break;
 
 			case IZQUIERDA:
-				posX -= serpiente.getAncho();
+				posElementosX -= serpiente.getAncho();
 				break;
 
 			case NINGUNA:
@@ -116,7 +128,7 @@ public class PantallaJuego implements Screen {
 				break;
 
 			}
-			serpiente.mover(posX, posY);
+			serpiente.mover(posElementosX, posElementosY);
 		}
 	}
 
@@ -125,19 +137,11 @@ public class PantallaJuego implements Screen {
 	}
 
 	private void moverManzanaAleatoria() {
-		int margen = grilla.getMargen();
+		int celdaX = random.nextInt(grilla.getCeldasX());
+		int celdaY = random.nextInt(grilla.getCeldasY());
 
-		int areaJugableAncho = Config.ANCHO - (2 * margen);
-		int areaJugableAlto = Config.ALTO - (2 * margen);
-
-		int celdasX = areaJugableAncho / tamanio;
-		int celdasY = areaJugableAlto / tamanio;
-
-		int celdaX = random.nextInt(celdasX);
-		int celdaY = random.nextInt(celdasY);
-
-		float nuevaX = margen + (celdaX * tamanio);
-		float nuevaY = margen + (celdaY * tamanio);
+		float nuevaX = grilla.getMargen() + (celdaX * tamanioElementos);
+		float nuevaY = grilla.getMargen() + (celdaY * tamanioElementos);
 
 		manzana.setPosX(nuevaX);
 		manzana.setPosY(nuevaY);
@@ -146,16 +150,16 @@ public class PantallaJuego implements Screen {
 	private boolean colisionBordes() {
 		int margen = grilla.getMargen();
 		float serpienteX = serpiente.getPosX(), serpienteY = serpiente.getPosY();
-		boolean colision = false; 
-		
-		if(serpienteX < margen || serpienteX >= Config.ANCHO - margen || serpienteY < margen || serpienteY >= Config.ALTO - margen) {
-			colision = true; 
+		boolean colision = false;
+
+		if (serpienteX < margen || serpienteX >= Config.ANCHO - margen || serpienteY < margen
+				|| serpienteY >= Config.ALTO - margen) {
+			colision = true;
 		}
-		
+
 		return colision;
 	}
-	
-	
+
 	@Override
 	public void resize(int width, int height) {
 	}

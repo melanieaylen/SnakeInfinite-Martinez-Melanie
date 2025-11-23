@@ -50,6 +50,6 @@ public class Manzana {
 
 	public void dibujar() {
 		Render.shaper.setColor(Color.RED);
-		Render.shaper.rect(posX, posY, ancho - 1, alto - 1);
+		Render.shaper.rect(posX, posY, ancho-1, alto-1);
 	}
 }

@@ -11,17 +11,17 @@ import utiles.Render;
 public class Texto {
 	private BitmapFont fuente;
 
-	public Texto(String rutaFuente, int dimension, Color colorLetra, Color colorSombra, int sombraX, int sombraY,
+	public Texto(String rutaFuente, float dimension, Color colorLetra, Color colorSombra, int sombraX, int sombraY,
 			boolean borde) {
 		generarTexto(rutaFuente, dimension, colorLetra, colorSombra, sombraX, sombraY, borde);
 	}
 	
-	private void generarTexto(String rutaFuente, int dimension, Color colorLetra, Color colorSombra, int sombraX, int sombraY,
+	private void generarTexto(String rutaFuente, float dimension, Color colorLetra, Color colorSombra, int sombraX, int sombraY,
 			boolean borde) {
 		FreeTypeFontGenerator generador = new FreeTypeFontGenerator(Gdx.files.internal(rutaFuente));
 		FreeTypeFontParameter parametros = new FreeTypeFontGenerator.FreeTypeFontParameter();
 
-		parametros.size = dimension;
+		parametros.size = (int) dimension;
 		parametros.color = colorLetra;
 		parametros.shadowColor = colorSombra;
 		parametros.shadowOffsetX = sombraX;
