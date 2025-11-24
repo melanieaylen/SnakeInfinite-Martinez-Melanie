@@ -35,6 +35,7 @@ public class PantallaJuego implements Screen {
 
 	// DISEÑO Y CONFIGURACION
 	private Imagen fondo;
+	private Imagen manzanaImagen; 
 	private Texto textoPuntuacion; 
 	private int tamanioElementos = 30;
 	private float posElementosX = 0, posElementosY = 0;
@@ -46,16 +47,12 @@ public class PantallaJuego implements Screen {
 
 		// INICIALIZACION
 		fondo = new Imagen(Recursos.FONDO_JUEGO);
+		manzanaImagen = new Imagen (Recursos.MANZANA);
+		manzanaImagen.setParametros(100, 855, tamanioElementos, tamanioElementos);
 		textoPuntuacion = new Texto(Recursos.FUENTE, 30, Color.WHITE, Color.BLACK, -4, 4, true);
 		grilla = new Grilla(tamanioElementos);
-
-		int celdasCentroX = (grilla.getAnchoJuego() / tamanioElementos) / 2;
-		int celdasCentroY = (grilla.getAltoJuego() / tamanioElementos) / 2;
-
-		// Posición inicial en píxeles (centro del área jugable)
-		posElementosX = grilla.getMargen() + (celdasCentroX * tamanioElementos);
-		posElementosY = grilla.getMargen() + (celdasCentroY * tamanioElementos);
-
+		
+		posicionInicial();
 		serpiente = new Serpiente(posElementosX, posElementosY, tamanioElementos, tamanioElementos);
 		manzana = new Manzana(posElementosX + (tamanioElementos * 4), posElementosY, tamanioElementos,tamanioElementos);
 		random = new Random();
@@ -66,10 +63,10 @@ public class PantallaJuego implements Screen {
 	@Override
 	public void render(float delta) {
 		Render.limpiarPantalla(1, 1, 1);
-		procesarTransparencia();
 		Render.batch.begin();
 		fondo.dibujar();
 		grilla.dibujarFondoGrilla();
+		manzanaImagen.dibujar();
 		Render.batch.end();
 
 		Render.shaper.begin(ShapeType.Line);
@@ -89,20 +86,23 @@ public class PantallaJuego implements Screen {
 		} else {
 			serpiente.dibujar();
 		}
+		
 		manzana.dibujar();
 		Render.shaper.end();
 		
+		System.out.println(String.valueOf(puntuacion));
 		Render.batch.begin();
-		textoPuntuacion.dibujarTexto(String.valueOf(puntuacion), 500, 500);
+		textoPuntuacion.dibujarTexto(String.valueOf(puntuacion), 160, 890);
 		Render.batch.end();
 	}
 	
-	private void procesarTransparencia() {
-		a+= 0.004f;
-		if(a > 1) {		
-			a = 1; 
-		}
-		fondo.setTransparencia(a);
+	private void posicionInicial(){
+		int celdasCentroX = (grilla.getAnchoJuego() / tamanioElementos) / 2;
+		int celdasCentroY = (grilla.getAltoJuego() / tamanioElementos) / 2;
+
+		// Posición inicial en píxeles (centro del área jugable)
+		posElementosX = grilla.getMargen() + (celdasCentroX * tamanioElementos);
+		posElementosY = grilla.getMargen() + (celdasCentroY * tamanioElementos);
 	}
 	
 	private void procesarEntradas(float delta) {
