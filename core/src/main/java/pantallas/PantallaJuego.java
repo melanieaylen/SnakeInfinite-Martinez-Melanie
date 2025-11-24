@@ -40,7 +40,7 @@ public class PantallaJuego implements Screen {
 	// LOGICA Y ETC
 	private float posElementosX;
 	private float posElementosY;
-	private int puntuacion;
+	private int puntuacion = 0;
 	private float tiempo;
 	private Random random;
 
@@ -63,8 +63,8 @@ public class PantallaJuego implements Screen {
 
 	@Override
 	public void render(float delta) {
-		Render.limpiarPantalla(1, 1, 1);
-
+		Render.limpiarPantalla(0, 0, 0);
+		Render.viewport.apply();
 		// LOGICA
 		procesarEntradas(delta);
 		if (colisionConManzana()) {
@@ -188,6 +188,7 @@ public class PantallaJuego implements Screen {
 
 	@Override
 	public void resize(int width, int height) {
+		Render.viewport.update(width, height);
 	}
 
 	@Override

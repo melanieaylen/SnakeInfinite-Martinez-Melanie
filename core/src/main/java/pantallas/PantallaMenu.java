@@ -3,7 +3,11 @@ package pantallas;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 import elementos.Imagen;
 import elementos.Texto;
@@ -26,7 +30,6 @@ public class PantallaMenu implements Screen {
 	private Texto subtitulo1;
 	private Texto subtitulo2;
 	private Texto opcionElegida;
-
 	private Entradas entrada = new Entradas();
 	private int opc = 1;
 	private float tiempo = 0;
@@ -37,7 +40,6 @@ public class PantallaMenu implements Screen {
 		menu = new Imagen(Recursos.FONDO_MENU);
 		serpiente = new Imagen(Recursos.ICONO);
 		serpiente.setParametros(720, 140, 130, 130);
-
 		Gdx.input.setInputProcessor(entrada);
 
 		musica = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica.mp3"));
@@ -52,6 +54,7 @@ public class PantallaMenu implements Screen {
 	@Override
 	public void render(float delta) {
 		Render.limpiarPantalla(0, 0, 0);
+		Render.viewport.apply();
 		procesarTransparencia();
 		procesarEntradas(delta);
 		actualizarInterfaz();
@@ -124,6 +127,7 @@ public class PantallaMenu implements Screen {
 
 	@Override
 	public void resize(int width, int height) {
+		Render.viewport.update(width, height);
 	}
 
 	@Override

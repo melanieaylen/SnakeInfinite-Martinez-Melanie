@@ -4,7 +4,6 @@
 package elementos;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import utiles.Config;
 import utiles.Recursos;

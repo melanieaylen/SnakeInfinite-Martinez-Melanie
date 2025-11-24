@@ -25,7 +25,7 @@ public class Lwjgl3Launcher {
 
         configuration.setWindowedMode(Config.ANCHO, Config.ALTO);
         configuration.setWindowIcon("otros/icono.png");
-        configuration.setResizable(false);
+        configuration.setResizable(true);
 
         configuration.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.ANGLE_GLES20, 0, 0);
 

@@ -1,7 +1,6 @@
 package elementos;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import utiles.Config;
 import utiles.Render;
@@ -34,7 +33,7 @@ public class Serpiente {
 			} else {
 				Render.shaper.setColor(Color.BLACK);
 			}
-			Render.shaper.rect(posiciones[i][0], posiciones[i][1], ancho - 1, alto - 1);
+			Render.shaper.rect(posiciones[i][0], posiciones[i][1], ancho, alto);
 		}
 	}
 
