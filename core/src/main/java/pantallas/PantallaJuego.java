@@ -29,7 +29,6 @@ public class PantallaJuego implements Screen {
 	private Grilla grilla;
 
 	// DISEÑO
-	private Imagen fondo;
 	private Imagen manzanaImagen;
 	private Texto textoPuntuacion;	
 
@@ -47,7 +46,6 @@ public class PantallaJuego implements Screen {
 	@Override
 	public void show() {
 		// INICIALIZACION
-		fondo = new Imagen(Recursos.FONDO_JUEGO);
 		manzanaImagen = new Imagen(Recursos.MANZANA);
 		manzanaImagen.setParametros(100, 855, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
 		textoPuntuacion = new Texto(Recursos.TEXTO, 33, Color.WHITE, Color.BLACK, -4, 4, true);
@@ -63,7 +61,8 @@ public class PantallaJuego implements Screen {
 
 	@Override
 	public void render(float delta) {
-		Render.limpiarPantalla(0, 0, 0);
+		Render.limpiarPantalla(0.90f, 0.80f, 1.0f);
+		
 		Render.viewport.apply();
 		// LOGICA
 		procesarEntradas(delta);
@@ -73,17 +72,15 @@ public class PantallaJuego implements Screen {
 			puntuacion++;
 		}
 
-		// RENDER (IMAGENES)
-		Render.batch.begin();
-		fondo.dibujar();
-		grilla.dibujarFondoGrilla();
-		manzanaImagen.dibujar();
-		Render.batch.end();
-
 		// SHAPER LINE (GRILLA)
 		Render.shaper.begin(ShapeType.Line);
 		grilla.dibujarGrilla();
 		Render.shaper.end();
+		
+		// RENDER (IMAGENES)
+		Render.batch.begin();
+		manzanaImagen.dibujar();
+		Render.batch.end();
 
 		// SHAPER FILLED (SERPIENTE)
 		Render.shaper.begin(ShapeType.Filled);
@@ -103,12 +100,12 @@ public class PantallaJuego implements Screen {
 	}
 
 	private void posicionInicial() {
-		int celdasCentroX = (grilla.getAnchoJuego() / TAMANIO_ELEMENTOS) / 2;
-		int celdasCentroY = (grilla.getAltoJuego() / TAMANIO_ELEMENTOS) / 2;
+		int celdasCentroX = (Config.ANCHO / TAMANIO_ELEMENTOS) / 2;
+		int celdasCentroY = (Config.ALTO / TAMANIO_ELEMENTOS) / 2;
 
 		// Posición inicial en píxeles (centro del área jugable)
-		posElementosX = grilla.getMargen() + (celdasCentroX * TAMANIO_ELEMENTOS);
-		posElementosY = grilla.getMargen() + (celdasCentroY * TAMANIO_ELEMENTOS);
+		posElementosX = celdasCentroX * TAMANIO_ELEMENTOS;
+		posElementosY = celdasCentroY * TAMANIO_ELEMENTOS;
 	}
 
 	private void procesarEntradas(float delta) {
@@ -166,20 +163,18 @@ public class PantallaJuego implements Screen {
 		int celdaX = random.nextInt(grilla.getCeldasX());
 		int celdaY = random.nextInt(grilla.getCeldasY());
 
-		float nuevaX = grilla.getMargen() + (celdaX * TAMANIO_ELEMENTOS);
-		float nuevaY = grilla.getMargen() + (celdaY * TAMANIO_ELEMENTOS);
+		float nuevaX = celdaX * TAMANIO_ELEMENTOS;
+		float nuevaY = celdaY * TAMANIO_ELEMENTOS;
 
 		manzana.setPosX(nuevaX);
 		manzana.setPosY(nuevaY);
 	}
 
 	private boolean colisionBordes() {
-		int margen = grilla.getMargen();
 		float serpienteX = serpiente.getPosX(), serpienteY = serpiente.getPosY();
 		boolean colision = false;
 
-		if (serpienteX < margen || serpienteX >= Config.ANCHO - margen || serpienteY < margen
-				|| serpienteY >= Config.ALTO - margen) {
+		if (serpienteX < 0 || serpienteX >= Config.ANCHO || serpienteY < 0 || serpienteY >= Config.ALTO) {
 			colision = true;
 		}
 
@@ -205,8 +200,6 @@ public class PantallaJuego implements Screen {
 
 	@Override
 	public void dispose() {
-		grilla.dispose();
-		fondo.dispose();
 	}
 
 }
