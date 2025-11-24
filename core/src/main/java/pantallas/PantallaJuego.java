@@ -4,12 +4,14 @@ import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import elementos.Grilla;
 import elementos.Imagen;
 import elementos.Manzana;
 import elementos.Serpiente;
+import elementos.Texto;
 import entradas.salidas.teclado.Entradas;
 import utiles.Config;
 import utiles.Recursos;
@@ -29,18 +31,22 @@ public class PantallaJuego implements Screen {
 
 	// LOGICA
 	private Random random;
+	private int puntuacion = 0; 
 
 	// DISEÑO Y CONFIGURACION
 	private Imagen fondo;
+	private Texto textoPuntuacion; 
 	private int tamanioElementos = 30;
 	private float posElementosX = 0, posElementosY = 0;
 
+	private float a = 0; 
 	@Override
 	public void show() {
 		// AREA JUGABLE
 
 		// INICIALIZACION
 		fondo = new Imagen(Recursos.FONDO_JUEGO);
+		textoPuntuacion = new Texto(Recursos.FUENTE, 30, Color.WHITE, Color.BLACK, -4, 4, true);
 		grilla = new Grilla(tamanioElementos);
 
 		int celdasCentroX = (grilla.getAnchoJuego() / tamanioElementos) / 2;
@@ -60,6 +66,7 @@ public class PantallaJuego implements Screen {
 	@Override
 	public void render(float delta) {
 		Render.limpiarPantalla(1, 1, 1);
+		procesarTransparencia();
 		Render.batch.begin();
 		fondo.dibujar();
 		grilla.dibujarFondoGrilla();
@@ -73,6 +80,7 @@ public class PantallaJuego implements Screen {
 		if (colisionConManzana()) {
 			serpiente.crecer();
 			moverManzanaAleatoria();
+			puntuacion++; 
 		}
 
 		Render.shaper.begin(ShapeType.Filled);
@@ -83,8 +91,20 @@ public class PantallaJuego implements Screen {
 		}
 		manzana.dibujar();
 		Render.shaper.end();
+		
+		Render.batch.begin();
+		textoPuntuacion.dibujarTexto(String.valueOf(puntuacion), 500, 500);
+		Render.batch.end();
 	}
-
+	
+	private void procesarTransparencia() {
+		a+= 0.004f;
+		if(a > 1) {		
+			a = 1; 
+		}
+		fondo.setTransparencia(a);
+	}
+	
 	private void procesarEntradas(float delta) {
 		if (entrada.isArriba() && direccionActual != Direcciones.ABAJO) {
 			direccionActual = Direcciones.ARRIBA;
@@ -101,7 +121,7 @@ public class PantallaJuego implements Screen {
 
 	private void moverSerpiente(float delta) {
 		tiempo += delta;
-		if (tiempo > 0.1f) {
+		if (tiempo > 0.12f) {
 			tiempo = 0;
 
 			switch (direccionActual) {

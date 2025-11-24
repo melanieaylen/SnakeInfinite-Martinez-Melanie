@@ -3,11 +3,13 @@ package elementos;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
+import utiles.Recursos;
 import utiles.Render;
 
 public class Manzana {
 	private float posX, posY;
 	private int ancho, alto;
+	private Imagen imagen; 
 	
 	public float getPosX() {
 		return posX;
@@ -38,6 +40,8 @@ public class Manzana {
 		this.posY = posY;
 		this.ancho = ancho;
 		this.alto = alto;
+		
+		imagen = new Imagen(Recursos.MANZANA);
 	}
 	
 	public int getAlto() {
@@ -48,8 +52,15 @@ public class Manzana {
 		this.alto = alto;
 	}
 
-	public void dibujar() {
-		Render.shaper.setColor(Color.RED);
-		Render.shaper.rect(posX, posY, ancho-1, alto-1);
+//	public void dibujar() {
+//		Render.shaper.setColor(Color.RED);
+//		Render.shaper.rect(posX, posY, ancho-1, alto-1);
+//	}
+	
+	public void dibujar () {
+		Render.batch.begin();
+		imagen.setParametros(posX, posY, ancho-1, alto-1);
+		imagen.dibujar();
+		Render.batch.end();
 	}
 }

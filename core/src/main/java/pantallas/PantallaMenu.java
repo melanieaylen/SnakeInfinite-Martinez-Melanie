@@ -30,6 +30,7 @@ public class PantallaMenu implements Screen {
 	private int tamanioSubTexto = 50;
 	private int tamanioTexto = 120;
 
+	private float a = 0; 
 	@Override
 	public void show() {
 		menu = new Imagen(Recursos.FONDO_MENU);
@@ -50,6 +51,7 @@ public class PantallaMenu implements Screen {
 	@Override
 	public void render(float delta) {
 		Render.limpiarPantalla(0, 0, 0);
+		procesarTransparencia();
 		procesarEntradas(delta);
 		actualizarInterfaz();
 
@@ -68,6 +70,14 @@ public class PantallaMenu implements Screen {
 			opcionElegida.dibujarTexto("> ", 540, 400);
 		}
 		Render.batch.end();
+	}
+
+	private void procesarTransparencia() {
+		a+= 0.012f;
+		if(a > 1) {		
+			a = 1; 
+		}
+		menu.setTransparencia(a);
 	}
 
 	private void procesarEntradas(float delta) {

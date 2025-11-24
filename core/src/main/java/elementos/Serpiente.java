@@ -30,11 +30,11 @@ public class Serpiente {
 	public void dibujar() {
 		for (int i = 0; i < tamanioActual; i++) {
 			if (i == 0) {
-				Render.shaper.setColor(Color.NAVY);
+				Render.shaper.setColor(Color.LIME);
 			} else {
 				Render.shaper.setColor(Color.BLACK);
 			}
-			Render.shaper.rect(posiciones[i][0], posiciones[i][1], ancho, alto);
+			Render.shaper.rect(posiciones[i][0], posiciones[i][1], ancho - 1, alto - 1);
 		}
 	}
 
