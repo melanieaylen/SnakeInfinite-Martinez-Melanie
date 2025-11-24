@@ -19,92 +19,98 @@ import utiles.Render;
 
 public class PantallaJuego implements Screen {
 
+	// CONSTANTES
+	private final int TAMANIO_ELEMENTOS = 30;
+	private final float VELOCIDAD_ENTRADAS = 0.12f;
+
 	// ELEMENTOS
 	private Serpiente serpiente;
-	private Grilla grilla;
 	private Manzana manzana;
+	private Grilla grilla;
+
+	// DISEÑO
+	private Imagen fondo;
+	private Imagen manzanaImagen;
+	private Texto textoPuntuacion;	
 
 	// ENTRADAS
 	private Entradas entrada = new Entradas();
-	private float tiempo = 0;
 	private Direcciones direccionActual = Direcciones.NINGUNA;
 
-	// LOGICA
+	// LOGICA Y ETC
+	private float posElementosX;
+	private float posElementosY;
+	private int puntuacion;
+	private float tiempo;
 	private Random random;
-	private int puntuacion = 0; 
 
-	// DISEÑO Y CONFIGURACION
-	private Imagen fondo;
-	private Imagen manzanaImagen; 
-	private Texto textoPuntuacion; 
-	private int tamanioElementos = 30;
-	private float posElementosX = 0, posElementosY = 0;
-
-	private float a = 0; 
 	@Override
 	public void show() {
-		// AREA JUGABLE
-
 		// INICIALIZACION
 		fondo = new Imagen(Recursos.FONDO_JUEGO);
-		manzanaImagen = new Imagen (Recursos.MANZANA);
-		manzanaImagen.setParametros(100, 855, tamanioElementos, tamanioElementos);
-		textoPuntuacion = new Texto(Recursos.FUENTE, 30, Color.WHITE, Color.BLACK, -4, 4, true);
-		grilla = new Grilla(tamanioElementos);
-		
-		posicionInicial();
-		serpiente = new Serpiente(posElementosX, posElementosY, tamanioElementos, tamanioElementos);
-		manzana = new Manzana(posElementosX + (tamanioElementos * 4), posElementosY, tamanioElementos,tamanioElementos);
-		random = new Random();
+		manzanaImagen = new Imagen(Recursos.MANZANA);
+		manzanaImagen.setParametros(100, 855, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
+		textoPuntuacion = new Texto(Recursos.TEXTO, 33, Color.WHITE, Color.BLACK, -4, 4, true);
+		grilla = new Grilla(TAMANIO_ELEMENTOS);
 
+		posicionInicial();
+		serpiente = new Serpiente(posElementosX, posElementosY, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
+		manzana = new Manzana(posElementosX + (TAMANIO_ELEMENTOS * 4), posElementosY, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
+		random = new Random();
+		
 		Gdx.input.setInputProcessor(entrada);
 	}
 
 	@Override
 	public void render(float delta) {
 		Render.limpiarPantalla(1, 1, 1);
+
+		// LOGICA
+		procesarEntradas(delta);
+		if (colisionConManzana()) {
+			serpiente.crecer();
+			moverManzanaAleatoria();
+			puntuacion++;
+		}
+
+		// RENDER (IMAGENES)
 		Render.batch.begin();
 		fondo.dibujar();
 		grilla.dibujarFondoGrilla();
 		manzanaImagen.dibujar();
 		Render.batch.end();
 
+		// SHAPER LINE (GRILLA)
 		Render.shaper.begin(ShapeType.Line);
 		grilla.dibujarGrilla();
 		Render.shaper.end();
 
-		procesarEntradas(delta);
-		if (colisionConManzana()) {
-			serpiente.crecer();
-			moverManzanaAleatoria();
-			puntuacion++; 
-		}
-
+		// SHAPER FILLED (SERPIENTE)
 		Render.shaper.begin(ShapeType.Filled);
 		if (serpiente.colisionSerpiente() || colisionBordes()) {
 			Render.app.setScreen(new GameOver());
 		} else {
 			serpiente.dibujar();
 		}
-		
-		manzana.dibujar();
 		Render.shaper.end();
-		
+
+		// RENDER
 		System.out.println(String.valueOf(puntuacion));
 		Render.batch.begin();
-		textoPuntuacion.dibujarTexto(String.valueOf(puntuacion), 160, 890);
+		manzana.dibujar();
+		textoPuntuacion.dibujarTexto(String.valueOf(puntuacion), 160, 882);
 		Render.batch.end();
 	}
-	
-	private void posicionInicial(){
-		int celdasCentroX = (grilla.getAnchoJuego() / tamanioElementos) / 2;
-		int celdasCentroY = (grilla.getAltoJuego() / tamanioElementos) / 2;
+
+	private void posicionInicial() {
+		int celdasCentroX = (grilla.getAnchoJuego() / TAMANIO_ELEMENTOS) / 2;
+		int celdasCentroY = (grilla.getAltoJuego() / TAMANIO_ELEMENTOS) / 2;
 
 		// Posición inicial en píxeles (centro del área jugable)
-		posElementosX = grilla.getMargen() + (celdasCentroX * tamanioElementos);
-		posElementosY = grilla.getMargen() + (celdasCentroY * tamanioElementos);
+		posElementosX = grilla.getMargen() + (celdasCentroX * TAMANIO_ELEMENTOS);
+		posElementosY = grilla.getMargen() + (celdasCentroY * TAMANIO_ELEMENTOS);
 	}
-	
+
 	private void procesarEntradas(float delta) {
 		if (entrada.isArriba() && direccionActual != Direcciones.ABAJO) {
 			direccionActual = Direcciones.ARRIBA;
@@ -121,7 +127,7 @@ public class PantallaJuego implements Screen {
 
 	private void moverSerpiente(float delta) {
 		tiempo += delta;
-		if (tiempo > 0.12f) {
+		if (tiempo > VELOCIDAD_ENTRADAS) {
 			tiempo = 0;
 
 			switch (direccionActual) {
@@ -160,8 +166,8 @@ public class PantallaJuego implements Screen {
 		int celdaX = random.nextInt(grilla.getCeldasX());
 		int celdaY = random.nextInt(grilla.getCeldasY());
 
-		float nuevaX = grilla.getMargen() + (celdaX * tamanioElementos);
-		float nuevaY = grilla.getMargen() + (celdaY * tamanioElementos);
+		float nuevaX = grilla.getMargen() + (celdaX * TAMANIO_ELEMENTOS);
+		float nuevaY = grilla.getMargen() + (celdaY * TAMANIO_ELEMENTOS);
 
 		manzana.setPosX(nuevaX);
 		manzana.setPosY(nuevaY);

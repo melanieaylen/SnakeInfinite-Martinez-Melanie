@@ -9,4 +9,5 @@ public class Recursos {
 	public static final String FONDO_JUEGO = "fondos/fondoJuego.png";
 	public static final String MANZANA = "elementos/manzana.png";
 	public static final String GAME_OVER = "fondos/gameOver.png";
+	public static final String TEXTO = "texto/textoDos.ttf";
 }

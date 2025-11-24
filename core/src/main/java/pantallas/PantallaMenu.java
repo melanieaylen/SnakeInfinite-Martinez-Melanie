@@ -13,6 +13,10 @@ import utiles.Render;
 
 public class PantallaMenu implements Screen {
 
+	//CONSTANTES
+	private final int TAMANIO_TEXTO = 120;
+	private final int TAMANIO_SUB = 50;
+	
 	private Imagen menu;
 	private Imagen serpiente;
 
@@ -27,9 +31,6 @@ public class PantallaMenu implements Screen {
 	private int opc = 1;
 	private float tiempo = 0;
 
-	private int tamanioSubTexto = 50;
-	private int tamanioTexto = 120;
-
 	private float a = 0; 
 	@Override
 	public void show() {
@@ -42,10 +43,10 @@ public class PantallaMenu implements Screen {
 		musica = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica.mp3"));
 		musica.play();
 
-		titulo = new Texto(Recursos.FUENTE, tamanioTexto, Color.WHITE, Color.TEAL, -3, 3, false);
-		subtitulo1 = new Texto(Recursos.FUENTE, tamanioSubTexto, Color.WHITE, Color.BLACK, -4, 4, true);
-		subtitulo2 = new Texto(Recursos.FUENTE, tamanioSubTexto, Color.WHITE, Color.BLACK, -4, 4, true);
-		opcionElegida = new Texto(Recursos.FUENTE, tamanioSubTexto, Color.SKY, Color.BLACK, -4, 4, true);
+		titulo = new Texto(Recursos.FUENTE, TAMANIO_TEXTO, Color.WHITE, Color.TEAL, -3, 3, false);
+		subtitulo1 = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
+		subtitulo2 = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
+		opcionElegida = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.SKY, Color.BLACK, -4, 4, true);
 	}
 
 	@Override
