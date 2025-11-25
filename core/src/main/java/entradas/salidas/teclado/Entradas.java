@@ -3,8 +3,6 @@ package entradas.salidas.teclado;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 
-import pantallas.PantallaMenu;
-
 public class Entradas implements InputProcessor {
 
 	public boolean abajo = false, arriba = false, enter = false, izquierda = false, derecha = false;

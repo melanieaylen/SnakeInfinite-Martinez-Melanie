@@ -1,10 +1,7 @@
 package elementos;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import utiles.Recursos;
-import utiles.Render;
 
 public class Manzana {
 	private float posX, posY;
@@ -52,9 +49,12 @@ public class Manzana {
 		this.alto = alto;
 	}
 
-	
 	public void dibujar () {
 		imagen.setParametros(posX, posY, ancho-1, alto-1);
 		imagen.dibujar();
+	}
+
+	public void dispose() {
+		imagen.dispose();
 	}
 }

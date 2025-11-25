@@ -5,6 +5,7 @@ import java.util.Random;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import elementos.Grilla;
@@ -21,7 +22,7 @@ public class PantallaJuego implements Screen {
 
 	// CONSTANTES
 	private final int TAMANIO_ELEMENTOS = 30;
-	private final float VELOCIDAD_ENTRADAS = 0.12f;
+	private final float VELOCIDAD_SERPIENTE = 0.12f; // Tiempo entre movimientos
 
 	// ELEMENTOS
 	private Serpiente serpiente;
@@ -30,8 +31,9 @@ public class PantallaJuego implements Screen {
 
 	// DISEÑO
 	private Imagen manzanaImagen;
-	private Texto textoPuntuacion;	
-
+	private Texto textoPuntuacion;
+	private OrthographicCamera camara;
+	
 	// ENTRADAS
 	private Entradas entrada = new Entradas();
 	private Direcciones direccionActual = Direcciones.NINGUNA;
@@ -47,14 +49,22 @@ public class PantallaJuego implements Screen {
 	public void show() {
 		// INICIALIZACION
 		manzanaImagen = new Imagen(Recursos.MANZANA);
-		manzanaImagen.setParametros(100, 855, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
 		textoPuntuacion = new Texto(Recursos.TEXTO, 33, Color.WHITE, Color.BLACK, -4, 4, true);
 		grilla = new Grilla(TAMANIO_ELEMENTOS);
 
-		posicionInicial();
+		// Posición inicial
+		posElementosX = 0;
+		posElementosY = 0;
+		
 		serpiente = new Serpiente(posElementosX, posElementosY, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
 		manzana = new Manzana(posElementosX + (TAMANIO_ELEMENTOS * 4), posElementosY, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
 		random = new Random();
+		
+		// Configurar cámara
+		camara = new OrthographicCamera();
+		camara.setToOrtho(false, Config.ANCHO, Config.ALTO);
+		camara.position.set(posElementosX, posElementosY, 0);
+		camara.update();
 		
 		Gdx.input.setInputProcessor(entrada);
 	}
@@ -62,8 +72,7 @@ public class PantallaJuego implements Screen {
 	@Override
 	public void render(float delta) {
 		Render.limpiarPantalla(0.90f, 0.80f, 1.0f);
-		
-		Render.viewport.apply();
+
 		// LOGICA
 		procesarEntradas(delta);
 		if (colisionConManzana()) {
@@ -72,40 +81,97 @@ public class PantallaJuego implements Screen {
 			puntuacion++;
 		}
 
-		// SHAPER LINE (GRILLA)
-		Render.shaper.begin(ShapeType.Line);
-		grilla.dibujarGrilla();
-		Render.shaper.end();
+		// ACTUALIZAR CAMARA PARA SEGUIR A LA SERPIENTE
+		actualizarCamara();
 		
-		// RENDER (IMAGENES)
-		Render.batch.begin();
-		manzanaImagen.dibujar();
-		Render.batch.end();
+		// Aplicar la cámara a los renderers
+		Render.batch.setProjectionMatrix(camara.combined);
+		Render.shaper.setProjectionMatrix(camara.combined);
+		
+		// RENDER GRILLA (con patrón infinito)
+		Render.shaper.begin(ShapeType.Line);
+		dibujarGrillaInfinita();
+		Render.shaper.end();
 
-		// SHAPER FILLED (SERPIENTE)
+		// RENDER SERPIENTE
 		Render.shaper.begin(ShapeType.Filled);
-		if (serpiente.colisionSerpiente() || colisionBordes()) {
+		if (serpiente.colisionSerpiente()) {
 			Render.app.setScreen(new GameOver());
 		} else {
 			serpiente.dibujar();
 		}
 		Render.shaper.end();
 
-		// RENDER
-		System.out.println(String.valueOf(puntuacion));
+		// RENDER MANZANA
 		Render.batch.begin();
 		manzana.dibujar();
-		textoPuntuacion.dibujarTexto(String.valueOf(puntuacion), 160, 882);
 		Render.batch.end();
+		
+		// UI FIJA (sin afectar por la cámara)
+		dibujarUI();
 	}
 
-	private void posicionInicial() {
-		int celdasCentroX = (Config.ANCHO / TAMANIO_ELEMENTOS) / 2;
-		int celdasCentroY = (Config.ALTO / TAMANIO_ELEMENTOS) / 2;
+	private void actualizarCamara() {
+		// Centrar la cámara directamente en la serpiente (sin lag)
+		float targetX = serpiente.getPosX() + TAMANIO_ELEMENTOS / 2;
+		float targetY = serpiente.getPosY() + TAMANIO_ELEMENTOS / 2;
+		
+		// Actualización instantánea
+		camara.position.set(targetX, targetY, 0);
+		camara.update();
+	}
 
-		// Posición inicial en píxeles (centro del área jugable)
-		posElementosX = celdasCentroX * TAMANIO_ELEMENTOS;
-		posElementosY = celdasCentroY * TAMANIO_ELEMENTOS;
+	private void dibujarGrillaInfinita() {
+		Render.shaper.setColor(Color.DARK_GRAY);
+		
+		// Calcular el área visible basada en la cámara
+		float camX = camara.position.x;
+		float camY = camara.position.y;
+		float anchoVisible = camara.viewportWidth;
+		float altoVisible = camara.viewportHeight;
+		
+		// Calcular límites de la grilla visible
+		int inicioX = (int)((camX - anchoVisible / 2) / TAMANIO_ELEMENTOS) - 1;
+		int finX = (int)((camX + anchoVisible / 2) / TAMANIO_ELEMENTOS) + 1;
+		int inicioY = (int)((camY - altoVisible / 2) / TAMANIO_ELEMENTOS) - 1;
+		int finY = (int)((camY + altoVisible / 2) / TAMANIO_ELEMENTOS) + 1;
+		
+		// Dibujar líneas verticales
+		for (int x = inicioX; x <= finX; x++) {
+			float posX = x * TAMANIO_ELEMENTOS;
+			Render.shaper.line(
+				posX, 
+				inicioY * TAMANIO_ELEMENTOS, 
+				posX, 
+				finY * TAMANIO_ELEMENTOS
+			);
+		}
+		
+		// Dibujar líneas horizontales
+		for (int y = inicioY; y <= finY; y++) {
+			float posY = y * TAMANIO_ELEMENTOS;
+			Render.shaper.line(
+				inicioX * TAMANIO_ELEMENTOS, 
+				posY, 
+				finX * TAMANIO_ELEMENTOS, 
+				posY
+			);
+		}
+	}
+
+	private void dibujarUI() {
+		// Guardar la matriz de proyección actual
+		camara.setToOrtho(false, Config.ANCHO, Config.ALTO);
+		camara.position.set(Config.ANCHO / 2, Config.ALTO / 2, 0);
+		camara.update();
+		Render.batch.setProjectionMatrix(camara.combined);
+		
+		// Dibujar UI fija
+		Render.batch.begin();
+		manzanaImagen.setParametros(20, Config.ALTO - 60, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
+		manzanaImagen.dibujar();
+		textoPuntuacion.dibujarTexto(String.valueOf(puntuacion), 60, Config.ALTO - 35);
+		Render.batch.end();
 	}
 
 	private void procesarEntradas(float delta) {
@@ -124,7 +190,7 @@ public class PantallaJuego implements Screen {
 
 	private void moverSerpiente(float delta) {
 		tiempo += delta;
-		if (tiempo > VELOCIDAD_ENTRADAS) {
+		if (tiempo > VELOCIDAD_SERPIENTE) {
 			tiempo = 0;
 
 			switch (direccionActual) {
@@ -149,8 +215,9 @@ public class PantallaJuego implements Screen {
 
 			default:
 				break;
-
 			}
+			
+			// La serpiente puede moverse libremente sin límites
 			serpiente.mover(posElementosX, posElementosY);
 		}
 	}
@@ -160,30 +227,23 @@ public class PantallaJuego implements Screen {
 	}
 
 	private void moverManzanaAleatoria() {
-		int celdaX = random.nextInt(grilla.getCeldasX());
-		int celdaY = random.nextInt(grilla.getCeldasY());
-
-		float nuevaX = celdaX * TAMANIO_ELEMENTOS;
-		float nuevaY = celdaY * TAMANIO_ELEMENTOS;
+		// Generar manzana cerca de la serpiente (dentro de un rango visible)
+		int rangoMin = -10;
+		int rangoMax = 20;
+		
+		int offsetX = random.nextInt(rangoMax - rangoMin + 1) + rangoMin;
+		int offsetY = random.nextInt(rangoMax - rangoMin + 1) + rangoMin;
+		
+		float nuevaX = serpiente.getPosX() + (offsetX * TAMANIO_ELEMENTOS);
+		float nuevaY = serpiente.getPosY() + (offsetY * TAMANIO_ELEMENTOS);
 
 		manzana.setPosX(nuevaX);
 		manzana.setPosY(nuevaY);
 	}
 
-	private boolean colisionBordes() {
-		float serpienteX = serpiente.getPosX(), serpienteY = serpiente.getPosY();
-		boolean colision = false;
-
-		if (serpienteX < 0 || serpienteX >= Config.ANCHO || serpienteY < 0 || serpienteY >= Config.ALTO) {
-			colision = true;
-		}
-
-		return colision;
-	}
-
 	@Override
 	public void resize(int width, int height) {
-		Render.viewport.update(width, height);
+		camara.setToOrtho(false, width, height);
 	}
 
 	@Override
@@ -201,5 +261,4 @@ public class PantallaJuego implements Screen {
 	@Override
 	public void dispose() {
 	}
-
 }
