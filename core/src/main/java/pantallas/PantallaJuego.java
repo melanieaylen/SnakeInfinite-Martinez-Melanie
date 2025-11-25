@@ -33,7 +33,7 @@ public class PantallaJuego implements Screen {
 	private Imagen manzanaImagen;
 	private Texto textoPuntuacion;
 	private OrthographicCamera camara;
-	
+
 	// ENTRADAS
 	private Entradas entrada = new Entradas();
 	private Direcciones direccionActual = Direcciones.NINGUNA;
@@ -51,21 +51,28 @@ public class PantallaJuego implements Screen {
 		manzanaImagen = new Imagen(Recursos.MANZANA);
 		textoPuntuacion = new Texto(Recursos.TEXTO, 33, Color.WHITE, Color.BLACK, -4, 4, true);
 		grilla = new Grilla(TAMANIO_ELEMENTOS);
-
+		  grilla.setColores(
+			        new Color(0.96f, 0.86f, 0.90f, 1f),  // Rosa claro
+			        new Color(0.92f, 0.80f, 0.86f, 1f)   // Rosa sutilmente más oscuro
+			    );
+			    
+			    // Líneas muy suaves para no romper el efecto
+			    grilla.setColorLineas(new Color(0.85f, 0.70f, 0.80f, 0.2f));
 		// Posición inicial
 		posElementosX = 0;
 		posElementosY = 0;
-		
+
 		serpiente = new Serpiente(posElementosX, posElementosY, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
-		manzana = new Manzana(posElementosX + (TAMANIO_ELEMENTOS * 4), posElementosY, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
+		manzana = new Manzana(posElementosX + (TAMANIO_ELEMENTOS * 4), posElementosY, TAMANIO_ELEMENTOS,
+				TAMANIO_ELEMENTOS);
 		random = new Random();
-		
+
 		// Configurar cámara
 		camara = new OrthographicCamera();
 		camara.setToOrtho(false, Config.ANCHO, Config.ALTO);
 		camara.position.set(posElementosX, posElementosY, 0);
 		camara.update();
-		
+
 		Gdx.input.setInputProcessor(entrada);
 	}
 
@@ -83,15 +90,13 @@ public class PantallaJuego implements Screen {
 
 		// ACTUALIZAR CAMARA PARA SEGUIR A LA SERPIENTE
 		actualizarCamara();
-		
+
 		// Aplicar la cámara a los renderers
 		Render.batch.setProjectionMatrix(camara.combined);
 		Render.shaper.setProjectionMatrix(camara.combined);
-		
-		// RENDER GRILLA (con patrón infinito)
-		Render.shaper.begin(ShapeType.Line);
-		dibujarGrillaInfinita();
-		Render.shaper.end();
+
+		// RENDER GRILLA (con patrón de ajedrez)
+		grilla.dibujarGrillaInfinita(camara);
 
 		// RENDER SERPIENTE
 		Render.shaper.begin(ShapeType.Filled);
@@ -106,7 +111,7 @@ public class PantallaJuego implements Screen {
 		Render.batch.begin();
 		manzana.dibujar();
 		Render.batch.end();
-		
+
 		// UI FIJA (sin afectar por la cámara)
 		dibujarUI();
 	}
@@ -115,48 +120,10 @@ public class PantallaJuego implements Screen {
 		// Centrar la cámara directamente en la serpiente (sin lag)
 		float targetX = serpiente.getPosX() + TAMANIO_ELEMENTOS / 2;
 		float targetY = serpiente.getPosY() + TAMANIO_ELEMENTOS / 2;
-		
+
 		// Actualización instantánea
 		camara.position.set(targetX, targetY, 0);
 		camara.update();
-	}
-
-	private void dibujarGrillaInfinita() {
-		Render.shaper.setColor(Color.DARK_GRAY);
-		
-		// Calcular el área visible basada en la cámara
-		float camX = camara.position.x;
-		float camY = camara.position.y;
-		float anchoVisible = camara.viewportWidth;
-		float altoVisible = camara.viewportHeight;
-		
-		// Calcular límites de la grilla visible
-		int inicioX = (int)((camX - anchoVisible / 2) / TAMANIO_ELEMENTOS) - 1;
-		int finX = (int)((camX + anchoVisible / 2) / TAMANIO_ELEMENTOS) + 1;
-		int inicioY = (int)((camY - altoVisible / 2) / TAMANIO_ELEMENTOS) - 1;
-		int finY = (int)((camY + altoVisible / 2) / TAMANIO_ELEMENTOS) + 1;
-		
-		// Dibujar líneas verticales
-		for (int x = inicioX; x <= finX; x++) {
-			float posX = x * TAMANIO_ELEMENTOS;
-			Render.shaper.line(
-				posX, 
-				inicioY * TAMANIO_ELEMENTOS, 
-				posX, 
-				finY * TAMANIO_ELEMENTOS
-			);
-		}
-		
-		// Dibujar líneas horizontales
-		for (int y = inicioY; y <= finY; y++) {
-			float posY = y * TAMANIO_ELEMENTOS;
-			Render.shaper.line(
-				inicioX * TAMANIO_ELEMENTOS, 
-				posY, 
-				finX * TAMANIO_ELEMENTOS, 
-				posY
-			);
-		}
 	}
 
 	private void dibujarUI() {
@@ -165,7 +132,7 @@ public class PantallaJuego implements Screen {
 		camara.position.set(Config.ANCHO / 2, Config.ALTO / 2, 0);
 		camara.update();
 		Render.batch.setProjectionMatrix(camara.combined);
-		
+
 		// Dibujar UI fija
 		Render.batch.begin();
 		manzanaImagen.setParametros(20, Config.ALTO - 60, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
@@ -216,7 +183,7 @@ public class PantallaJuego implements Screen {
 			default:
 				break;
 			}
-			
+
 			// La serpiente puede moverse libremente sin límites
 			serpiente.mover(posElementosX, posElementosY);
 		}
@@ -230,10 +197,10 @@ public class PantallaJuego implements Screen {
 		// Generar manzana cerca de la serpiente (dentro de un rango visible)
 		int rangoMin = -10;
 		int rangoMax = 20;
-		
+
 		int offsetX = random.nextInt(rangoMax - rangoMin + 1) + rangoMin;
 		int offsetY = random.nextInt(rangoMax - rangoMin + 1) + rangoMin;
-		
+
 		float nuevaX = serpiente.getPosX() + (offsetX * TAMANIO_ELEMENTOS);
 		float nuevaY = serpiente.getPosY() + (offsetY * TAMANIO_ELEMENTOS);
 
