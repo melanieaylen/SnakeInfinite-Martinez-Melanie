@@ -1,8 +1,6 @@
 package elementos;
 
 import com.badlogic.gdx.graphics.Color;
-
-import utiles.Config;
 import utiles.Render;
 
 public class Serpiente {
@@ -86,16 +84,8 @@ public class Serpiente {
 		return ancho;
 	}
 
-	public void setAncho(int ancho) {
-		this.ancho = ancho;
-	}
-
 	public int getAlto() {
 		return alto;
-	}
-
-	public void setAlto(int alto) {
-		this.alto = alto;
 	}
 
 	public float getPosX() {

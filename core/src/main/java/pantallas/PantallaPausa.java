@@ -14,7 +14,7 @@ import entradas.salidas.teclado.Entradas;
 import utiles.Recursos;
 import utiles.Render;
 
-public class PantallaMenu implements Screen {
+public class PantallaPausa implements Screen {
 
 	//CONSTANTES
 	private final int TAMANIO_TEXTO = 120;
@@ -69,8 +69,8 @@ public class PantallaMenu implements Screen {
 		serpiente.dibujar();
 		
 		titulo.dibujarTexto("Snake Infinite", 330, 750);
-		subtitulo1.dibujarTexto("   Un Jugador", 580, 530);
-		subtitulo2.dibujarTexto("   Multijugador", 565, 400);
+		subtitulo1.dibujarTexto(" Continuar", 580, 530);
+		subtitulo2.dibujarTexto("   Volver a inicio", 565, 400);
 
 		if (opc == 1) {
 			opcionElegida.dibujarTexto("> ", 540, 530);
@@ -110,12 +110,12 @@ public class PantallaMenu implements Screen {
 				}
 			}
 		}
-
+ 
 		if (entrada.isEnter()) {
 			if (opc == 1) {
 				Render.app.setScreen(new PantallaJuego());
 			} else if (opc == 2) {
-				Render.app.setScreen(new PantallaEjemplo());
+				Render.app.setScreen(new PantallaMenu());
 			}
 		}
 	}

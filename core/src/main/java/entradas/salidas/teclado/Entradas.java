@@ -5,7 +5,8 @@ import com.badlogic.gdx.InputProcessor;
 
 public class Entradas implements InputProcessor {
 
-	public boolean abajo = false, arriba = false, enter = false, izquierda = false, derecha = false;
+	public boolean abajo = false, arriba = false, izquierda = false, derecha = false;
+	public boolean enter = false, pausa = false ; 
 	
 	//getters y setters
 	public boolean isEnter() {
@@ -36,6 +37,10 @@ public class Entradas implements InputProcessor {
 		
 		if (keycode == Keys.RIGHT) {
 			derecha = true; 
+		}
+		
+		if(keycode == Keys.P) {
+			pausa = true; 
 		}
 		return false;
 	}
@@ -78,7 +83,19 @@ public class Entradas implements InputProcessor {
 		if(keycode == Keys.RIGHT) {
 			derecha = false; 
 		}
+		
+		if(keycode == Keys.P) {
+			pausa = false; 
+		}
 		return false;
+	}
+
+	public boolean isPausa() {
+		return pausa;
+	}
+
+	public void setPausa(boolean pausa) {
+		this.pausa = pausa;
 	}
 
 	public boolean isIzquierda() {

@@ -1,27 +1,20 @@
 package mi.juego.snake;
 
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import pantallas.PantallaMenu;
 import utiles.Render;
 
 public class Principal extends Game {
-
-	private OrthographicCamera camara;
 	
 	public void create() {
 		// Creo el objeto
 		Render.app = this;
 		Render.batch = new SpriteBatch();
 		Render.shaper = new ShapeRenderer();
-		camara = new OrthographicCamera();
-		Render.viewport = new FitViewport(1440, 900, camara);
 		this.setScreen(new PantallaMenu());
 	}
 
