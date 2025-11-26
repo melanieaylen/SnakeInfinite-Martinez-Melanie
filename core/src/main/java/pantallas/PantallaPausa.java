@@ -2,6 +2,8 @@ package pantallas;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -31,6 +33,8 @@ public class PantallaPausa implements Screen {
     private int opc = 1;
     private float tiempo = 0;
     private float a = 0;
+    private Music musica; 
+    private Sound sonidoBoton; 
     
     private OrthographicCamera camara;
     private Viewport viewport;
@@ -51,7 +55,10 @@ public class PantallaPausa implements Screen {
         Gdx.input.setInputProcessor(entrada);
         camara = new OrthographicCamera();
         viewport = new FitViewport(1440, 900, camara);
-
+        musica = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musicaJuego.wav"));
+        musica.setLooping(true); 
+        musica.play();
+        sonidoBoton = Gdx.audio.newSound(Gdx.files.internal("sonidos/boton.ogg"));
         titulo = new Texto(Recursos.FUENTE, TAMANIO_TEXTO, Color.WHITE, Color.TEAL, -3, 3, false);
         subtitulo1 = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
         subtitulo2 = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
@@ -114,6 +121,7 @@ public class PantallaPausa implements Screen {
         }
 
         if (entrada.isEnter()) {
+        	sonidoBoton.play();
             if (opc == 1) {
                 // ✅ Continuar - restaurar estado guardado
                 Render.app.setScreen(new PantallaJuego(estadoJuego));
@@ -151,11 +159,22 @@ public class PantallaPausa implements Screen {
     
     @Override
     public void hide() {
-    	
+        // ✅ CLAVE: Se llama cuando cambias de pantalla
+        // Aquí pausas o detienes la música
+        if (musica != null && musica.isPlaying()) {
+            musica.stop(); // Para detener completamente
+            // O usa musica.pause() si quieres reanudarla después
+        }
     }
     
     @Override
     public void dispose() {
+    	 if (musica != null) {
+             musica.dispose();
+         }
+         if (sonidoBoton != null) {
+ 	            sonidoBoton.dispose();
+ 	        }
         titulo.dispose();
         subtitulo1.dispose();
         subtitulo2.dispose();

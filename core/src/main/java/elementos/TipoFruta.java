@@ -7,6 +7,10 @@ public enum TipoFruta {
     BANANA(Recursos.BANANA, 2, 1.0f),
     CEREZA(Recursos.CEREZA, 3, 1.0f),
     SANDIA(Recursos.SANDIA, 5, 1.5f),
+    FRUTILLA(Recursos.FRUTILLA, 2, 1.5f),
+    NARANAJA(Recursos.NARANJA, 1, 1.0f),
+    MORA(Recursos.MORA, 1, 1.0f),
+    PIÑA(Recursos.PIÑA, 1, 1.0f),
     UVA(Recursos.UVA, 1, 1.0f);
 
     private final String rutaImagen;

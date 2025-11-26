@@ -2,6 +2,7 @@ package pantallas;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -13,7 +14,6 @@ import elementos.EstadoJuego;
 import elementos.Fruta;
 import elementos.GestorFrutas;
 import elementos.Grilla;
-import elementos.Imagen;
 import elementos.Serpiente;
 import elementos.Texto;
 import entradas.salidas.teclado.Entradas;
@@ -26,23 +26,25 @@ public class PantallaJuego implements Screen {
 	// CONSTANTES
 	private final int TAMANIO_ELEMENTOS = 30;
 	private final float VELOCIDAD_SERPIENTE = 0.12f; // Tiempo entre movimientos
+	private final float DURACION_INVULNERABILIDAD = 1.5f; // Segundos de invulnerabilidad
 
 	// Para el mundo del juego
 	private OrthographicCamera camaraUI;
 	private Viewport viewportUI;
 	private EstadoJuego estadoGuardado;
+	
 	// ELEMENTOS - FRUTAS
 	private Serpiente serpiente;
 	private GestorFrutas gestorFrutas;
 	private Grilla grilla;
 
 	// DISEÑO
-	private Imagen manzanaImagen;
 	private Texto textoPuntuacion;
 	private OrthographicCamera camara;
 	private Viewport viewport;
 	private Sound sonidoComer; 
-
+	private Music musica; 
+	
 	// ENTRADAS
 	private Entradas entrada = new Entradas();
 	private Direcciones direccionActual = Direcciones.NINGUNA;
@@ -52,58 +54,67 @@ public class PantallaJuego implements Screen {
 	private float posElementosY;
 	private int puntuacion = 0;
 	private float tiempo;
+	private int vida = 3;
+	
+	// Sistema de invulnerabilidad
+	private boolean invulnerable = false;
+	private float tiempoInvulnerabilidad = 0;
 	
 	public PantallaJuego() {
-        this.estadoGuardado = null;
-    }
+		this.estadoGuardado = null;
+	}
 
-    // Constructor con estado (restaurar desde pausa)
-    public PantallaJuego(EstadoJuego estado) {
-        this.estadoGuardado = estado;
-    }
+	// Constructor con estado (restaurar desde pausa)
+	public PantallaJuego(EstadoJuego estado) {
+		this.estadoGuardado = estado;
+	}
+	
 	@Override
-	 public void show() {
-        manzanaImagen = new Imagen(Recursos.MANZANA);
-        textoPuntuacion = new Texto(Recursos.TEXTO, 33, Color.WHITE, Color.BLACK, -4, 4, true);
-        grilla = new Grilla(TAMANIO_ELEMENTOS);
-        sonidoComer = Gdx.audio.newSound(Gdx.files.internal("sonidos/comer.wav"));
-        
-        // ✅ Restaurar estado si existe
-        if (estadoGuardado != null) {
-            serpiente = estadoGuardado.getSerpiente();
-            gestorFrutas = estadoGuardado.getGestorFrutas();
-            puntuacion = estadoGuardado.getPuntuacion();
-            posElementosX = estadoGuardado.getPosElementosX();
-            posElementosY = estadoGuardado.getPosElementosY();
-            direccionActual = estadoGuardado.getDireccionActual();
-            tiempo = estadoGuardado.getTiempo();
-        } else {
-            // Inicialización normal (juego nuevo)
-            posElementosX = 0;
-            posElementosY = 0;
-            serpiente = new Serpiente(posElementosX, posElementosY, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
-            gestorFrutas = new GestorFrutas(TAMANIO_ELEMENTOS);
-            gestorFrutas.inicializarFrutas(serpiente);
-            puntuacion = 0;
-            tiempo = 0;
-            direccionActual = Direcciones.NINGUNA;
-        }
+	public void show() {
+		textoPuntuacion = new Texto(Recursos.TEXTO, 33, Color.WHITE, Color.BLACK, -4, 4, true);
+		grilla = new Grilla(TAMANIO_ELEMENTOS);
+		sonidoComer = Gdx.audio.newSound(Gdx.files.internal("sonidos/comer.wav"));
+		musica = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musicaJuego.wav"));
+		musica.setLooping(true); 
+		musica.play();
+		
+		// Restaurar estado si existe
+		if (estadoGuardado != null) {
+			serpiente = estadoGuardado.getSerpiente();
+			gestorFrutas = estadoGuardado.getGestorFrutas();
+			puntuacion = estadoGuardado.getPuntuacion();
+			posElementosX = estadoGuardado.getPosElementosX();
+			posElementosY = estadoGuardado.getPosElementosY();
+			direccionActual = estadoGuardado.getDireccionActual();
+			tiempo = estadoGuardado.getTiempo();
+			vida = estadoGuardado.getVida();
+		} else {
+			// Inicialización normal (juego nuevo)
+			posElementosX = 0;
+			posElementosY = 0;
+			serpiente = new Serpiente(posElementosX, posElementosY, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
+			gestorFrutas = new GestorFrutas(TAMANIO_ELEMENTOS);
+			gestorFrutas.inicializarFrutas(serpiente);
+			puntuacion = 0;
+			tiempo = 0;
+			direccionActual = Direcciones.NINGUNA;
+			vida = 3;
+		}
 
-        // Configurar cámaras
-        camara = new OrthographicCamera();
-        camara.setToOrtho(false, Config.ANCHO, Config.ALTO);
-        viewport = new FitViewport(Config.ANCHO, Config.ALTO, camara);
-        camara.position.set(posElementosX, posElementosY, 0);
-        camara.update();
+		// Configurar cámaras
+		camara = new OrthographicCamera();
+		camara.setToOrtho(false, Config.ANCHO, Config.ALTO);
+		viewport = new FitViewport(Config.ANCHO, Config.ALTO, camara);
+		camara.position.set(posElementosX, posElementosY, 0);
+		camara.update();
 
-        camaraUI = new OrthographicCamera();
-        viewportUI = new FitViewport(Config.ANCHO, Config.ALTO, camaraUI);
-        camaraUI.position.set(Config.ANCHO / 2, Config.ALTO / 2, 0);
-        camaraUI.update();
+		camaraUI = new OrthographicCamera();
+		viewportUI = new FitViewport(Config.ANCHO, Config.ALTO, camaraUI);
+		camaraUI.position.set(Config.ANCHO / 2, Config.ALTO / 2, 0);
+		camaraUI.update();
 
-        Gdx.input.setInputProcessor(entrada);
-    }
-
+		Gdx.input.setInputProcessor(entrada);
+	}
 
 	@Override
 	public void render(float delta) {
@@ -112,11 +123,21 @@ public class PantallaJuego implements Screen {
 		// LOGICA
 		procesarEntradas(delta);
 
+		// Actualizar invulnerabilidad
+		if (invulnerable) {
+			tiempoInvulnerabilidad += delta;
+			if (tiempoInvulnerabilidad >= DURACION_INVULNERABILIDAD) {
+				invulnerable = false;
+				tiempoInvulnerabilidad = 0;
+			}
+		}
+
+		// Verificar colisiones con frutas
 		Fruta frutaColisionada = gestorFrutas.verificarColisiones(serpiente);
 		if (frutaColisionada != null) {
 			sonidoComer.play();
 			serpiente.crecer();
-			puntuacion += frutaColisionada.getTipo().getPuntos(); // ✅ Puntos configurables
+			puntuacion += frutaColisionada.getTipo().getPuntos();
 			gestorFrutas.reubicarFruta(frutaColisionada, serpiente);
 		}
 
@@ -131,11 +152,17 @@ public class PantallaJuego implements Screen {
 		// RENDER SERPIENTE
 		Render.shaper.begin(ShapeType.Filled);
 		grilla.dibujarGrilla(camara);
-		if (serpiente.colisionSerpiente()) {
-			Render.app.setScreen(new GameOver());
-		} else {
+		
+		// Verificar colisión solo si NO es invulnerable
+		if (!invulnerable && serpiente.colisionSerpiente()) {
+			perderVida();
+		}
+		
+		// Dibujar serpiente con efecto de parpadeo si es invulnerable
+		if (!invulnerable || (int)(tiempoInvulnerabilidad * 10) % 2 == 0) {
 			serpiente.dibujar();
 		}
+		
 		Render.shaper.end();
 
 		// RENDER FRUTAS
@@ -145,6 +172,28 @@ public class PantallaJuego implements Screen {
 
 		// ===== RENDER DE LA UI FIJA =====
 		dibujarUI();
+	}
+
+	private void perderVida() {
+		vida--;
+		
+		if (vida <= 0) {
+			// Game Over
+			Render.app.setScreen(new GameOver());
+		} else {
+			// Resetear serpiente a la posición inicial
+			posElementosX = 0;
+			posElementosY = 0;
+			direccionActual = Direcciones.NINGUNA;
+			
+			// Recrear serpiente en posición inicial
+			serpiente = new Serpiente(posElementosX, posElementosY, 
+									  TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
+			
+			// Activar invulnerabilidad
+			invulnerable = true;
+			tiempoInvulnerabilidad = 0;
+		}
 	}
 
 	private void actualizarCamara() {
@@ -158,14 +207,25 @@ public class PantallaJuego implements Screen {
 	}
 
 	private void dibujarUI() {
-		// ✅ Usa la cámara UI dedicada
+		// Usa la cámara UI dedicada
 		viewportUI.apply();
 		Render.batch.setProjectionMatrix(camaraUI.combined);
 
 		Render.batch.begin();
-		manzanaImagen.setParametros(20, Config.ALTO - 60, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
-		manzanaImagen.dibujar();
-		textoPuntuacion.dibujarTexto(String.valueOf(puntuacion), 60, Config.ALTO - 35);
+		
+		// Puntuación
+		textoPuntuacion.dibujarTexto("Puntos: " + puntuacion, 20, Config.ALTO - 35);
+		
+		// Vidas con corazones
+		textoPuntuacion.dibujarTexto("Vidas: " + vida, 20, Config.ALTO - 70);
+		
+		// Mensaje de invulnerabilidad (opcional)
+		if (invulnerable) {
+			textoPuntuacion.dibujarTexto("INVULNERABLE!", 
+										 Config.ANCHO / 2 - 100, 
+										 Config.ALTO / 2);
+		}
+		
 		Render.batch.end();
 	}
 
@@ -178,15 +238,15 @@ public class PantallaJuego implements Screen {
 			direccionActual = Direcciones.DERECHA;
 		} else if (entrada.isIzquierda() && direccionActual != Direcciones.DERECHA) {
 			direccionActual = Direcciones.IZQUIERDA;
-		}else if (entrada.isPausa()) {
-            // ✅ Guardar estado antes de pausar
-            EstadoJuego estado = new EstadoJuego(
-                serpiente, gestorFrutas, puntuacion,
-                posElementosX, posElementosY, direccionActual, tiempo
-            );
-            Render.app.setScreen(new PantallaPausa(estado));
-            return;
-        }
+		} else if (entrada.isPausa()) {
+			// Guardar estado antes de pausar
+			EstadoJuego estado = new EstadoJuego(
+				serpiente, gestorFrutas, puntuacion,
+				posElementosX, posElementosY, direccionActual, tiempo, vida
+			);
+			Render.app.setScreen(new PantallaPausa(estado));
+			return;
+		}
 
 		moverSerpiente(delta);
 	}
@@ -241,15 +301,22 @@ public class PantallaJuego implements Screen {
 
 	@Override
 	public void hide() {
+		// Se llama cuando cambias de pantalla
+		if (musica != null && musica.isPlaying()) {
+			musica.stop();
+		}
 	}
 
 	@Override
 	public void dispose() {
-		 if (estadoGuardado == null) {
-	            gestorFrutas.dispose();
-	        }
-		  if (sonidoComer != null) {
-	            sonidoComer.dispose();
-	        }
+		if (musica != null) {
+			musica.dispose();
+		}
+		if (estadoGuardado == null) {
+			gestorFrutas.dispose();
+		}
+		if (sonidoComer != null) {
+			sonidoComer.dispose();
+		}
 	}
 }

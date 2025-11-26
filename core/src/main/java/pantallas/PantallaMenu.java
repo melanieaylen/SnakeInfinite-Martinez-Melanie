@@ -3,6 +3,7 @@ package pantallas;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -33,6 +34,7 @@ public class PantallaMenu implements Screen {
     private float tiempo = 0;
     private float a = 0;
 
+    private Sound sonidoBoton; 
     private OrthographicCamera camara;
     private Viewport viewport;
 
@@ -44,7 +46,7 @@ public class PantallaMenu implements Screen {
         Gdx.input.setInputProcessor(entrada);
         camara = new OrthographicCamera();
         viewport = new FitViewport(1440, 900, camara);
-
+        sonidoBoton = Gdx.audio.newSound(Gdx.files.internal("sonidos/boton.ogg"));
         musica = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica.mp3"));
         musica.setLooping(true); // ✅ Para que se repita automáticamente
         musica.play();
@@ -114,7 +116,9 @@ public class PantallaMenu implements Screen {
         }
 
         if (entrada.isEnter()) {
+        	sonidoBoton.play();
             if (opc == 1) {
+      		  
                 Render.app.setScreen(new PantallaJuego());
             } else if (opc == 2) {
                 Render.app.setScreen(new PantallaEjemplo());
@@ -147,18 +151,10 @@ public class PantallaMenu implements Screen {
 
     @Override
     public void pause() {
-        // ✅ Se llama cuando la app pasa a segundo plano (Android)
-        if (musica != null && musica.isPlaying()) {
-            musica.pause();
-        }
     }
 
     @Override
     public void resume() {
-        // ✅ Se llama cuando la app vuelve del segundo plano (Android)
-        if (musica != null && !musica.isPlaying()) {
-            musica.play();
-        }
     }
 
     @Override
@@ -177,6 +173,9 @@ public class PantallaMenu implements Screen {
         if (musica != null) {
             musica.dispose();
         }
+        if (sonidoBoton != null) {
+	            sonidoBoton.dispose();
+	        }
         if (titulo != null) titulo.dispose();
         if (subtitulo1 != null) subtitulo1.dispose();
         if (subtitulo2 != null) subtitulo2.dispose();
