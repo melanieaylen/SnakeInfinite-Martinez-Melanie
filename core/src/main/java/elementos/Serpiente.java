@@ -51,7 +51,6 @@ public class Serpiente {
 			tamanioActual++;
 			debeCrecer = false;
 		}
-		System.out.println("Tamaño actual: " + tamanioActual);
 	}
 
 	public void crecer() {

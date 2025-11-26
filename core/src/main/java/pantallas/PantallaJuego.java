@@ -2,6 +2,7 @@ package pantallas;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -40,6 +41,7 @@ public class PantallaJuego implements Screen {
 	private Texto textoPuntuacion;
 	private OrthographicCamera camara;
 	private Viewport viewport;
+	private Sound sonidoComer; 
 
 	// ENTRADAS
 	private Entradas entrada = new Entradas();
@@ -64,7 +66,8 @@ public class PantallaJuego implements Screen {
         manzanaImagen = new Imagen(Recursos.MANZANA);
         textoPuntuacion = new Texto(Recursos.TEXTO, 33, Color.WHITE, Color.BLACK, -4, 4, true);
         grilla = new Grilla(TAMANIO_ELEMENTOS);
-
+        sonidoComer = Gdx.audio.newSound(Gdx.files.internal("sonidos/comer.wav"));
+        
         // ✅ Restaurar estado si existe
         if (estadoGuardado != null) {
             serpiente = estadoGuardado.getSerpiente();
@@ -111,6 +114,7 @@ public class PantallaJuego implements Screen {
 
 		Fruta frutaColisionada = gestorFrutas.verificarColisiones(serpiente);
 		if (frutaColisionada != null) {
+			sonidoComer.play();
 			serpiente.crecer();
 			puntuacion += frutaColisionada.getTipo().getPuntos(); // ✅ Puntos configurables
 			gestorFrutas.reubicarFruta(frutaColisionada, serpiente);
@@ -243,6 +247,9 @@ public class PantallaJuego implements Screen {
 	public void dispose() {
 		 if (estadoGuardado == null) {
 	            gestorFrutas.dispose();
+	        }
+		  if (sonidoComer != null) {
+	            sonidoComer.dispose();
 	        }
 	}
 }

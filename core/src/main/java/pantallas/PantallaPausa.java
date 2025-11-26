@@ -2,7 +2,6 @@ package pantallas;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -24,7 +23,6 @@ public class PantallaPausa implements Screen {
     
     private Imagen menu;
     private Imagen serpiente;
-    private Music musica;
     private Texto titulo;
     private Texto subtitulo1;
     private Texto subtitulo2;
@@ -53,9 +51,7 @@ public class PantallaPausa implements Screen {
         Gdx.input.setInputProcessor(entrada);
         camara = new OrthographicCamera();
         viewport = new FitViewport(1440, 900, camara);
-        
-        musica = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica.mp3"));
-        musica.play();
+
         titulo = new Texto(Recursos.FUENTE, TAMANIO_TEXTO, Color.WHITE, Color.TEAL, -3, 3, false);
         subtitulo1 = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
         subtitulo2 = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
@@ -144,18 +140,25 @@ public class PantallaPausa implements Screen {
     }
 
     @Override
+    public void pause() {
+    	
+    }
+    
+    @Override
+    public void resume() {
+    	
+    }
+    
+    @Override
+    public void hide() {
+    	
+    }
+    
+    @Override
     public void dispose() {
-        musica.dispose();
         titulo.dispose();
         subtitulo1.dispose();
         subtitulo2.dispose();
         opcionElegida.dispose();
     }
-
-    @Override
-    public void pause() {}
-    @Override
-    public void resume() {}
-    @Override
-    public void hide() {}
 }
