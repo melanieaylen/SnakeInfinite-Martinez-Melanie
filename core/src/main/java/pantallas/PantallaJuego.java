@@ -1,7 +1,5 @@
 package pantallas;
 
-import java.util.Random;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -10,12 +8,13 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import elementos.EstadoJuego;
 import elementos.Fruta;
+import elementos.GestorFrutas;
 import elementos.Grilla;
 import elementos.Imagen;
 import elementos.Serpiente;
 import elementos.Texto;
-import elementos.TipoFruta;
 import entradas.salidas.teclado.Entradas;
 import utiles.Config;
 import utiles.Recursos;
@@ -30,14 +29,10 @@ public class PantallaJuego implements Screen {
 	// Para el mundo del juego
 	private OrthographicCamera camaraUI;
 	private Viewport viewportUI;
-	
+	private EstadoJuego estadoGuardado;
 	// ELEMENTOS - FRUTAS
 	private Serpiente serpiente;
-	private Fruta manzana;
-	private Fruta banana;
-	private Fruta cereza;
-	private Fruta sandia;
-	private Fruta uva;
+	private GestorFrutas gestorFrutas;
 	private Grilla grilla;
 
 	// DISEÑO
@@ -55,54 +50,57 @@ public class PantallaJuego implements Screen {
 	private float posElementosY;
 	private int puntuacion = 0;
 	private float tiempo;
-	private Random random;
+	
+	public PantallaJuego() {
+        this.estadoGuardado = null;
+    }
 
+    // Constructor con estado (restaurar desde pausa)
+    public PantallaJuego(EstadoJuego estado) {
+        this.estadoGuardado = estado;
+    }
 	@Override
-	public void show() {
-		// INICIALIZACION
-		manzanaImagen = new Imagen(Recursos.MANZANA);
-		textoPuntuacion = new Texto(Recursos.TEXTO, 33, Color.WHITE, Color.BLACK, -4, 4, true);
-		grilla = new Grilla(TAMANIO_ELEMENTOS);
+	 public void show() {
+        manzanaImagen = new Imagen(Recursos.MANZANA);
+        textoPuntuacion = new Texto(Recursos.TEXTO, 33, Color.WHITE, Color.BLACK, -4, 4, true);
+        grilla = new Grilla(TAMANIO_ELEMENTOS);
 
-		// Posición inicial
-		posElementosX = 0;
-		posElementosY = 0;
+        // ✅ Restaurar estado si existe
+        if (estadoGuardado != null) {
+            serpiente = estadoGuardado.getSerpiente();
+            gestorFrutas = estadoGuardado.getGestorFrutas();
+            puntuacion = estadoGuardado.getPuntuacion();
+            posElementosX = estadoGuardado.getPosElementosX();
+            posElementosY = estadoGuardado.getPosElementosY();
+            direccionActual = estadoGuardado.getDireccionActual();
+            tiempo = estadoGuardado.getTiempo();
+        } else {
+            // Inicialización normal (juego nuevo)
+            posElementosX = 0;
+            posElementosY = 0;
+            serpiente = new Serpiente(posElementosX, posElementosY, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
+            gestorFrutas = new GestorFrutas(TAMANIO_ELEMENTOS);
+            gestorFrutas.inicializarFrutas(serpiente);
+            puntuacion = 0;
+            tiempo = 0;
+            direccionActual = Direcciones.NINGUNA;
+        }
 
-		serpiente = new Serpiente(posElementosX, posElementosY, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
+        // Configurar cámaras
+        camara = new OrthographicCamera();
+        camara.setToOrtho(false, Config.ANCHO, Config.ALTO);
+        viewport = new FitViewport(Config.ANCHO, Config.ALTO, camara);
+        camara.position.set(posElementosX, posElementosY, 0);
+        camara.update();
 
-		random = new Random();
+        camaraUI = new OrthographicCamera();
+        viewportUI = new FitViewport(Config.ANCHO, Config.ALTO, camaraUI);
+        camaraUI.position.set(Config.ANCHO / 2, Config.ALTO / 2, 0);
+        camaraUI.update();
 
-		// Inicializar todas las frutas en posiciones aleatorias
-		manzana = new Fruta(0, 0, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS, TipoFruta.MANZANA);
-		moverFrutaAleatoria(manzana);
+        Gdx.input.setInputProcessor(entrada);
+    }
 
-		banana = new Fruta(0, 0, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS, TipoFruta.BANANA);
-		moverFrutaAleatoria(banana);
-
-		cereza = new Fruta(0, 0, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS, TipoFruta.CEREZA);
-		moverFrutaAleatoria(cereza);
-
-		sandia = new Fruta(0, 0, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS, TipoFruta.SANDIA);
-		moverFrutaAleatoria(sandia);
-
-		uva = new Fruta(0, 0, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS, TipoFruta.UVA);
-		moverFrutaAleatoria(uva);
-
-		// Configurar cámara
-		camara = new OrthographicCamera();
-		camara.setToOrtho(false, Config.ANCHO, Config.ALTO);
-		viewport = new FitViewport(Config.ANCHO, Config.ALTO, camara);
-		camara.position.set(posElementosX, posElementosY, 0);
-		camara.update();
-
-		// Cámara para UI fija (no se mueve)
-		camaraUI = new OrthographicCamera();
-		viewportUI = new FitViewport(Config.ANCHO, Config.ALTO, camaraUI);
-		camaraUI.position.set(Config.ANCHO / 2, Config.ALTO / 2, 0);
-		camaraUI.update();
-
-		Gdx.input.setInputProcessor(entrada);
-	}
 
 	@Override
 	public void render(float delta) {
@@ -110,36 +108,12 @@ public class PantallaJuego implements Screen {
 
 		// LOGICA
 		procesarEntradas(delta);
-		
-		// Verificar colisión con cada fruta
-		if (colisionConFruta(manzana)) {
+
+		Fruta frutaColisionada = gestorFrutas.verificarColisiones(serpiente);
+		if (frutaColisionada != null) {
 			serpiente.crecer();
-			moverFrutaAleatoria(manzana);
-			puntuacion++;
-		}
-		
-		if (colisionConFruta(banana)) {
-			serpiente.crecer();
-			moverFrutaAleatoria(banana);
-			puntuacion++;
-		}
-		
-		if (colisionConFruta(cereza)) {
-			serpiente.crecer();
-			moverFrutaAleatoria(cereza);
-			puntuacion++;
-		}
-		
-		if (colisionConFruta(sandia)) {
-			serpiente.crecer();
-			moverFrutaAleatoria(sandia);
-			puntuacion++;
-		}
-		
-		if (colisionConFruta(uva)) {
-			serpiente.crecer();
-			moverFrutaAleatoria(uva);
-			puntuacion++;
+			puntuacion += frutaColisionada.getTipo().getPuntos(); // ✅ Puntos configurables
+			gestorFrutas.reubicarFruta(frutaColisionada, serpiente);
 		}
 
 		// ACTUALIZAR CAMARA PARA SEGUIR A LA SERPIENTE
@@ -162,11 +136,7 @@ public class PantallaJuego implements Screen {
 
 		// RENDER FRUTAS
 		Render.batch.begin();
-		manzana.dibujar();
-		banana.dibujar();
-		cereza.dibujar();
-		sandia.dibujar();
-		uva.dibujar();
+		gestorFrutas.dibujarTodas();
 		Render.batch.end();
 
 		// ===== RENDER DE LA UI FIJA =====
@@ -204,9 +174,15 @@ public class PantallaJuego implements Screen {
 			direccionActual = Direcciones.DERECHA;
 		} else if (entrada.isIzquierda() && direccionActual != Direcciones.DERECHA) {
 			direccionActual = Direcciones.IZQUIERDA;
-		}else if(entrada.isPausa()) {
-			Render.app.setScreen(new PantallaPausa());
-		}
+		}else if (entrada.isPausa()) {
+            // ✅ Guardar estado antes de pausar
+            EstadoJuego estado = new EstadoJuego(
+                serpiente, gestorFrutas, puntuacion,
+                posElementosX, posElementosY, direccionActual, tiempo
+            );
+            Render.app.setScreen(new PantallaPausa(estado));
+            return;
+        }
 
 		moverSerpiente(delta);
 	}
@@ -245,28 +221,6 @@ public class PantallaJuego implements Screen {
 		}
 	}
 
-	private boolean colisionConFruta(Fruta fruta) {
-		return fruta.getPosX() == serpiente.getPosX() && fruta.getPosY() == serpiente.getPosY();
-	}
-
-	private void moverFrutaAleatoria(Fruta fruta) {
-		// Generar fruta cerca de la serpiente (dentro de un rango visible)
-		int rangoMin = -10, rangoMax = 20;
-		float nuevaX = 0, nuevaY = 0;
-
-		do {
-			int offsetX = random.nextInt(rangoMax - rangoMin + 1) + rangoMin;
-			int offsetY = random.nextInt(rangoMax - rangoMin + 1) + rangoMin;
-
-			nuevaX = serpiente.getPosX() + (offsetX * TAMANIO_ELEMENTOS);
-			nuevaY = serpiente.getPosY() + (offsetY * TAMANIO_ELEMENTOS);
-
-		} while (serpiente.colisionConPosicion(nuevaX, nuevaY)); 
-
-		fruta.setPosX(nuevaX);
-		fruta.setPosY(nuevaY);
-	}
-
 	@Override
 	public void resize(int width, int height) {
 		viewport.update(width, height, true);
@@ -287,5 +241,8 @@ public class PantallaJuego implements Screen {
 
 	@Override
 	public void dispose() {
+		 if (estadoGuardado == null) {
+	            gestorFrutas.dispose();
+	        }
 	}
 }
