@@ -8,7 +8,7 @@ import elementos.Imagen;
 import utiles.Recursos;
 import utiles.Render;
 
-public class GameOver implements Screen {
+public class PantallaGameOver implements Screen {
     
     private float transparencia = 0; // Empieza invisible
     private Imagen fondo; // o los elementos que tengas

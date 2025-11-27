@@ -55,7 +55,7 @@ public class PantallaPausa implements Screen {
         Gdx.input.setInputProcessor(entrada);
         camara = new OrthographicCamera();
         viewport = new FitViewport(1440, 900, camara);
-        musica = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musicaJuego.wav"));
+        musica = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musicaJuego.mp3"));
         musica.setLooping(true); 
         musica.play();
         sonidoBoton = Gdx.audio.newSound(Gdx.files.internal("sonidos/boton.ogg"));

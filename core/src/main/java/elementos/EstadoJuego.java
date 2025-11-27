@@ -1,7 +1,5 @@
 package elementos;
 
-import pantallas.Direcciones;
-
 public class EstadoJuego {
     private Serpiente serpiente;
     private GestorFrutas gestorFrutas;

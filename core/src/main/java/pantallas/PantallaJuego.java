@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import elementos.Direcciones;
 import elementos.EstadoJuego;
 import elementos.Fruta;
 import elementos.GestorFrutas;
@@ -74,8 +75,9 @@ public class PantallaJuego implements Screen {
 		textoPuntuacion = new Texto(Recursos.TEXTO, 33, Color.WHITE, Color.BLACK, -4, 4, true);
 		grilla = new Grilla(TAMANIO_ELEMENTOS);
 		sonidoComer = Gdx.audio.newSound(Gdx.files.internal("sonidos/comer.wav"));
-		musica = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musicaJuego.wav"));
-		musica.setLooping(true); 
+		musica = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musicaJuego.mp3"));
+		musica.setLooping(true);
+		musica.setVolume(0.15f);
 		musica.play();
 		
 		// Restaurar estado si existe
@@ -118,7 +120,7 @@ public class PantallaJuego implements Screen {
 
 	@Override
 	public void render(float delta) {
-		Render.limpiarPantalla(0.90f, 0.80f, 1.0f);
+		Render.limpiarPantalla(0, 0, 0);
 
 		// LOGICA
 		procesarEntradas(delta);
@@ -179,7 +181,7 @@ public class PantallaJuego implements Screen {
 		
 		if (vida <= 0) {
 			// Game Over
-			Render.app.setScreen(new GameOver());
+			Render.app.setScreen(new PantallaGameOver());
 		} else {
 			// Resetear serpiente a la posición inicial
 			posElementosX = 0;

@@ -28,6 +28,7 @@ public class PantallaMenu implements Screen {
     private Texto subtitulo1;
     private Texto subtitulo2;
     private Texto subtitulo3;
+    private Texto subtitulo4; 
     private Texto opcionElegida;
     private Entradas entrada = new Entradas();
     private int opc = 1;
@@ -42,7 +43,7 @@ public class PantallaMenu implements Screen {
     public void show() {
         menu = new Imagen(Recursos.FONDO_MENU);
         serpiente = new Imagen(Recursos.ICONO);
-        serpiente.setParametros(720, 140, 130, 130);
+        serpiente.setParametros(900, 200, 300, 300);
         Gdx.input.setInputProcessor(entrada);
         camara = new OrthographicCamera();
         viewport = new FitViewport(1440, 900, camara);
@@ -55,6 +56,7 @@ public class PantallaMenu implements Screen {
         subtitulo1 = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
         subtitulo2 = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
         subtitulo3 = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
+        subtitulo4 = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
         opcionElegida = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.SKY, Color.BLACK, -4, 4, true);
     }
 
@@ -68,19 +70,22 @@ public class PantallaMenu implements Screen {
 
         Render.batch.begin();
         menu.dibujar();
-//        serpiente.dibujar();
+        serpiente.dibujar();
 
         titulo.dibujarTexto("Snake Infinite", 330, 750);
-        subtitulo1.dibujarTexto("   Un Jugador", 580, 530);
-        subtitulo2.dibujarTexto("   Multijugador", 565, 400);
-    	subtitulo3.dibujarTexto("   Salir", 650, 270);
+        subtitulo1.dibujarTexto("   Un Jugador", 360, 530);
+        subtitulo2.dibujarTexto("   Multijugador", 360, 430);
+        subtitulo3.dibujarTexto("   Configuracion", 360, 330);
+    	subtitulo4.dibujarTexto("   Salir", 360, 230);
 
         if (opc == 1) {
-            opcionElegida.dibujarTexto("> ", 540, 530);
+            opcionElegida.dibujarTexto("> ", 330, 530);
         } else if (opc == 2) {
-            opcionElegida.dibujarTexto("> ", 540, 400);
+            opcionElegida.dibujarTexto("> ", 330, 430);
         } else if (opc == 3) {
-        	opcionElegida.dibujarTexto("> ", 540, 270);
+        	opcionElegida.dibujarTexto("> ", 330, 330);
+        } else if (opc == 4) {
+        	opcionElegida.dibujarTexto("> ", 330, 230);
         }
         Render.batch.end();
     }
@@ -99,7 +104,7 @@ public class PantallaMenu implements Screen {
             if (tiempo > 0.2f) {
                 tiempo = 0;
                 opc++;
-                if (opc > 3) {
+                if (opc > 4) {
                     opc = 1;
                 }
             }
@@ -110,7 +115,7 @@ public class PantallaMenu implements Screen {
                 tiempo = 0;
                 opc--;
                 if (opc < 1) {
-                    opc = 3;
+                    opc = 4;
                 }
             }
         }
@@ -123,6 +128,8 @@ public class PantallaMenu implements Screen {
             } else if (opc == 2) {
                 Render.app.setScreen(new PantallaEjemplo());
             } else if (opc == 3) {
+            	Render.app.setScreen(new PantallaConfig());
+            } else if (opc == 4) {
             	Gdx.app.exit();
             }
         }
@@ -133,14 +140,22 @@ public class PantallaMenu implements Screen {
             subtitulo1.setColor(Color.SKY);
             subtitulo2.setColor(Color.WHITE);
             subtitulo3.setColor(Color.WHITE);
+            subtitulo4.setColor(Color.WHITE);
         } else if (opc == 2) {
             subtitulo1.setColor(Color.WHITE);
             subtitulo2.setColor(Color.SKY);
             subtitulo3.setColor(Color.WHITE);
+            subtitulo4.setColor(Color.WHITE);
         } else if (opc == 3) {
         	subtitulo1.setColor(Color.WHITE);
             subtitulo2.setColor(Color.WHITE);
             subtitulo3.setColor(Color.SKY);
+            subtitulo4.setColor(Color.WHITE);
+        } else if (opc == 4) {
+        	subtitulo1.setColor(Color.WHITE);
+            subtitulo2.setColor(Color.WHITE);
+            subtitulo3.setColor(Color.WHITE);
+            subtitulo4.setColor(Color.SKY);
         }
     }
 
