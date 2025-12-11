@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 import mi.juego.snake.Principal;
 
-public class Render {
+public abstract class Render {
 	// Declaro el objeto
 	public static SpriteBatch batch;
 	public static Principal app;

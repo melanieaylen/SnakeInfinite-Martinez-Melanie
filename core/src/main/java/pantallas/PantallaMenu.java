@@ -47,6 +47,7 @@ public class PantallaMenu implements Screen {
         Gdx.input.setInputProcessor(entrada);
         camara = new OrthographicCamera();
         viewport = new FitViewport(1440, 900, camara);
+       
         sonidoBoton = Gdx.audio.newSound(Gdx.files.internal("sonidos/boton.ogg"));
         musica = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica.mp3"));
         musica.setLooping(true); // ✅ Para que se repita automáticamente
@@ -65,6 +66,7 @@ public class PantallaMenu implements Screen {
         Render.limpiarPantalla(0, 0, 0);
         viewport.apply();
         procesarTransparencia();
+        
         procesarEntradas(delta);
         actualizarInterfaz();
 

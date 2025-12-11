@@ -15,6 +15,7 @@ import elementos.EstadoJuego;
 import elementos.Fruta;
 import elementos.GestorFrutas;
 import elementos.Grilla;
+import elementos.Imagen;
 import elementos.Serpiente;
 import elementos.Texto;
 import entradas.salidas.teclado.Entradas;
@@ -33,7 +34,7 @@ public class PantallaJuego implements Screen {
 	private OrthographicCamera camaraUI;
 	private Viewport viewportUI;
 	private EstadoJuego estadoGuardado;
-	
+
 	// ELEMENTOS - FRUTAS
 	private Serpiente serpiente;
 	private GestorFrutas gestorFrutas;
@@ -41,11 +42,12 @@ public class PantallaJuego implements Screen {
 
 	// DISEÑO
 	private Texto textoPuntuacion;
+	private Texto esperandoJugador;
 	private OrthographicCamera camara;
 	private Viewport viewport;
-	private Sound sonidoComer; 
-	private Music musica; 
-	
+	private Sound sonidoComer;
+	private Music musica;
+
 	// ENTRADAS
 	private Entradas entrada = new Entradas();
 	private Direcciones direccionActual = Direcciones.NINGUNA;
@@ -56,11 +58,13 @@ public class PantallaJuego implements Screen {
 	private int puntuacion = 0;
 	private float tiempo;
 	private int vida = 3;
+
+//	private HiloCliente hc; 
 	
 	// Sistema de invulnerabilidad
 	private boolean invulnerable = false;
 	private float tiempoInvulnerabilidad = 0;
-	
+
 	public PantallaJuego() {
 		this.estadoGuardado = null;
 	}
@@ -69,17 +73,19 @@ public class PantallaJuego implements Screen {
 	public PantallaJuego(EstadoJuego estado) {
 		this.estadoGuardado = estado;
 	}
-	
+
 	@Override
 	public void show() {
 		textoPuntuacion = new Texto(Recursos.TEXTO, 33, Color.WHITE, Color.BLACK, -4, 4, true);
+		esperandoJugador = new Texto(Recursos.TEXTO, 33, Color.WHITE, Color.BLACK, -4, 4, true);
+
 		grilla = new Grilla(TAMANIO_ELEMENTOS);
 		sonidoComer = Gdx.audio.newSound(Gdx.files.internal("sonidos/comer.wav"));
 		musica = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musicaJuego.mp3"));
 		musica.setLooping(true);
 		musica.setVolume(0.15f);
 		musica.play();
-		
+
 		// Restaurar estado si existe
 		if (estadoGuardado != null) {
 			serpiente = estadoGuardado.getSerpiente();
@@ -116,69 +122,77 @@ public class PantallaJuego implements Screen {
 		camaraUI.update();
 
 		Gdx.input.setInputProcessor(entrada);
+//		hc = new HiloCliente();
+//		hc.start();
 	}
 
 	@Override
 	public void render(float delta) {
 		Render.limpiarPantalla(0, 0, 0);
 
-		// LOGICA
-		procesarEntradas(delta);
+//		if (!Global.empieza) {
+//			Render.batch.begin();
+//			esperandoJugador.dibujarTexto("ESPERANDO JUGADOR", Config.ANCHO/2, Config.ALTO/2);
+//			Render.batch.end();
+//		} else {
 
-		// Actualizar invulnerabilidad
-		if (invulnerable) {
-			tiempoInvulnerabilidad += delta;
-			if (tiempoInvulnerabilidad >= DURACION_INVULNERABILIDAD) {
-				invulnerable = false;
-				tiempoInvulnerabilidad = 0;
+			// LOGICA
+			procesarEntradas(delta);
+
+			// Actualizar invulnerabilidad
+			if (invulnerable) {
+				tiempoInvulnerabilidad += delta;
+				if (tiempoInvulnerabilidad >= DURACION_INVULNERABILIDAD) {
+					invulnerable = false;
+					tiempoInvulnerabilidad = 0;
+				}
 			}
-		}
 
-		// Verificar colisiones con frutas
-		Fruta frutaColisionada = gestorFrutas.verificarColisiones(serpiente);
-		if (frutaColisionada != null) {
-			sonidoComer.play();
-			serpiente.crecer();
-			puntuacion += frutaColisionada.getTipo().getPuntos();
-			gestorFrutas.reubicarFruta(frutaColisionada, serpiente);
-		}
+			// Verificar colisiones con frutas
+			Fruta frutaColisionada = gestorFrutas.verificarColisiones(serpiente);
+			if (frutaColisionada != null) {
+				sonidoComer.play();
+				serpiente.crecer();
+				puntuacion += frutaColisionada.getTipo().getPuntos();
+				gestorFrutas.reubicarFruta(frutaColisionada, serpiente);
+			}
 
-		// ACTUALIZAR CAMARA PARA SEGUIR A LA SERPIENTE
-		actualizarCamara();
+			// ACTUALIZAR CAMARA PARA SEGUIR A LA SERPIENTE
+			actualizarCamara();
 
-		// ===== RENDER DEL MUNDO DEL JUEGO =====
-		viewport.apply();
-		Render.batch.setProjectionMatrix(camara.combined);
-		Render.shaper.setProjectionMatrix(camara.combined);
+			// ===== RENDER DEL MUNDO DEL JUEGO =====
+			viewport.apply();
+			Render.batch.setProjectionMatrix(camara.combined);
+			Render.shaper.setProjectionMatrix(camara.combined);
 
-		// RENDER SERPIENTE
-		Render.shaper.begin(ShapeType.Filled);
-		grilla.dibujarGrilla(camara);
-		
-		// Verificar colisión solo si NO es invulnerable
-		if (!invulnerable && serpiente.colisionSerpiente()) {
-			perderVida();
-		}
-		
-		// Dibujar serpiente con efecto de parpadeo si es invulnerable
-		if (!invulnerable || (int)(tiempoInvulnerabilidad * 10) % 2 == 0) {
-			serpiente.dibujar();
-		}
-		
-		Render.shaper.end();
+			// RENDER SERPIENTE
+			Render.shaper.begin(ShapeType.Filled);
+			grilla.dibujarGrilla(camara);
 
-		// RENDER FRUTAS
-		Render.batch.begin();
-		gestorFrutas.dibujarTodas();
-		Render.batch.end();
+			// Verificar colisión solo si NO es invulnerable
+			if (!invulnerable && serpiente.colisionSerpiente()) {
+				perderVida();
+			}
 
-		// ===== RENDER DE LA UI FIJA =====
-		dibujarUI();
+			// Dibujar serpiente con efecto de parpadeo si es invulnerable
+			if (!invulnerable || (int) (tiempoInvulnerabilidad * 10) % 2 == 0) {
+				serpiente.dibujar();
+			}
+
+			Render.shaper.end();
+
+			// FRUTAS
+			gestorFrutas.dibujarTodas();
+
+			// ===== RENDER DE LA UI FIJA =====
+			dibujarUI();
+//		}
+
 	}
 
 	private void perderVida() {
 		vida--;
-		
+
 		if (vida <= 0) {
 			// Game Over
 			Render.app.setScreen(new PantallaGameOver());
@@ -187,11 +201,10 @@ public class PantallaJuego implements Screen {
 			posElementosX = 0;
 			posElementosY = 0;
 			direccionActual = Direcciones.NINGUNA;
-			
+
 			// Recrear serpiente en posición inicial
-			serpiente = new Serpiente(posElementosX, posElementosY, 
-									  TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
-			
+			serpiente = new Serpiente(posElementosX, posElementosY, TAMANIO_ELEMENTOS, TAMANIO_ELEMENTOS);
+
 			// Activar invulnerabilidad
 			invulnerable = true;
 			tiempoInvulnerabilidad = 0;
@@ -214,20 +227,18 @@ public class PantallaJuego implements Screen {
 		Render.batch.setProjectionMatrix(camaraUI.combined);
 
 		Render.batch.begin();
-		
+
 		// Puntuación
 		textoPuntuacion.dibujarTexto("Puntos: " + puntuacion, 20, Config.ALTO - 35);
-		
+
 		// Vidas con corazones
 		textoPuntuacion.dibujarTexto("Vidas: " + vida, 20, Config.ALTO - 70);
-		
+
 		// Mensaje de invulnerabilidad (opcional)
 		if (invulnerable) {
-			textoPuntuacion.dibujarTexto("INVULNERABLE!", 
-										 Config.ANCHO / 2 - 100, 
-										 Config.ALTO / 2);
+			textoPuntuacion.dibujarTexto("INVULNERABLE!", Config.ANCHO / 2 - 100, Config.ALTO / 2);
 		}
-		
+
 		Render.batch.end();
 	}
 
@@ -242,10 +253,8 @@ public class PantallaJuego implements Screen {
 			direccionActual = Direcciones.IZQUIERDA;
 		} else if (entrada.isPausa()) {
 			// Guardar estado antes de pausar
-			EstadoJuego estado = new EstadoJuego(
-				serpiente, gestorFrutas, puntuacion,
-				posElementosX, posElementosY, direccionActual, tiempo, vida
-			);
+			EstadoJuego estado = new EstadoJuego(serpiente, gestorFrutas, puntuacion, posElementosX, posElementosY,
+					direccionActual, tiempo, vida);
 			Render.app.setScreen(new PantallaPausa(estado));
 			return;
 		}

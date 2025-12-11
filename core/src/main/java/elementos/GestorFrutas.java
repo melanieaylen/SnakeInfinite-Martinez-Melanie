@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import utiles.Render;
+
 public class GestorFrutas {
     private List<Fruta> frutas;
     private int tamanioElementos;
@@ -50,9 +52,11 @@ public class GestorFrutas {
      * Dibuja todas las frutas
      */
     public void dibujarTodas() {
+    	Render.batch.begin();
         for (Fruta fruta : frutas) {
             fruta.dibujar();
         }
+        Render.batch.end();
     }
 
     private void moverFrutaAleatoria(Fruta fruta, Serpiente serpiente) {

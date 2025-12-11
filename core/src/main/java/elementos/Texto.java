@@ -15,9 +15,9 @@ public class Texto {
 			boolean borde) {
 		generarTexto(rutaFuente, dimension, colorLetra, colorSombra, sombraX, sombraY, borde);
 	}
-	
-	private void generarTexto(String rutaFuente, float dimension, Color colorLetra, Color colorSombra, int sombraX, int sombraY,
-			boolean borde) {
+
+	private void generarTexto(String rutaFuente, float dimension, Color colorLetra, Color colorSombra, int sombraX,
+			int sombraY, boolean borde) {
 		FreeTypeFontGenerator generador = new FreeTypeFontGenerator(Gdx.files.internal(rutaFuente));
 		FreeTypeFontParameter parametros = new FreeTypeFontGenerator.FreeTypeFontParameter();
 
@@ -39,11 +39,11 @@ public class Texto {
 	public void setColor(Color color) {
 		fuente.setColor(color);
 	}
-	
+
 	public void dibujarTexto(String texto, float anchoTexto, float altoTexto) {
 		fuente.draw(Render.batch, texto, anchoTexto, altoTexto);
 	}
-	
+
 	public void dispose() {
 		fuente.dispose();
 	}
