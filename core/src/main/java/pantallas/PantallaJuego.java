@@ -46,7 +46,7 @@ public class PantallaJuego implements Screen {
 	private OrthographicCamera camara;
 	private Viewport viewport;
 	private Sound sonidoComer;
-	private Music musica;
+//	private Music musica;
 
 	// ENTRADAS
 	private Entradas entrada = new Entradas();
@@ -81,10 +81,10 @@ public class PantallaJuego implements Screen {
 
 		grilla = new Grilla(TAMANIO_ELEMENTOS);
 		sonidoComer = Gdx.audio.newSound(Gdx.files.internal("sonidos/comer.wav"));
-		musica = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musicaJuego.mp3"));
-		musica.setLooping(true);
-		musica.setVolume(0.15f);
-		musica.play();
+//		musica = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musicaJuego.mp3"));
+//		musica.setLooping(true);
+//		musica.setVolume(0.15f);
+//		musica.play();
 
 		// Restaurar estado si existe
 		if (estadoGuardado != null) {
@@ -312,17 +312,17 @@ public class PantallaJuego implements Screen {
 
 	@Override
 	public void hide() {
-		// Se llama cuando cambias de pantalla
-		if (musica != null && musica.isPlaying()) {
-			musica.stop();
-		}
+//		// Se llama cuando cambias de pantalla
+//		if (musica != null && musica.isPlaying()) {
+//			musica.stop();
+//		}
 	}
 
 	@Override
 	public void dispose() {
-		if (musica != null) {
-			musica.dispose();
-		}
+//		if (musica != null) {
+//			musica.dispose();
+//		}
 		if (estadoGuardado == null) {
 			gestorFrutas.dispose();
 		}

@@ -28,7 +28,7 @@ public abstract class Recursos {
     
     // Sonidos
     public static final String MUSICA_MENU = "sonidos/musica.mp3";
-    public static final String MUSICA_JUEGO = "sonidos/musicaJuego.mp3";
+//    public static final String MUSICA_JUEGO = "sonidos/musicaJuego.mp3";
     public static final String MUSICA_GAME_OVER = "sonidos/gameOver.mp3";
     public static final String SONIDO_BOTON = "sonidos/boton.ogg";
     public static final String SONIDO_COMER = "sonidos/comer.wav";
