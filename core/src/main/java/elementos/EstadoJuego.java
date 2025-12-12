@@ -1,58 +1,46 @@
 package elementos;
 
+import jugadores.Jugador;
+
+/**
+ * Estado del juego para sistema de pausa
+ * Ahora usa la clase Jugador en vez de manejar todo directamente
+ */
 public class EstadoJuego {
-    private Serpiente serpiente;
+    
+    private Jugador jugador;
     private GestorFrutas gestorFrutas;
-    private int puntuacion;
     private float posElementosX;
     private float posElementosY;
-    private Direcciones direccionActual;
     private float tiempo;
-    private int vida;
-
-    public EstadoJuego(Serpiente serpiente, GestorFrutas gestorFrutas, 
-                       int puntuacion, float posElementosX, float posElementosY,
-                       Direcciones direccionActual, float tiempo, int vida) {
-        this.serpiente = serpiente;
+    
+    public EstadoJuego(Jugador jugador, GestorFrutas gestorFrutas, 
+                       float posElementosX, float posElementosY, float tiempo) {
+        this.jugador = jugador;
         this.gestorFrutas = gestorFrutas;
-        this.puntuacion = puntuacion;
         this.posElementosX = posElementosX;
         this.posElementosY = posElementosY;
-        this.direccionActual = direccionActual;
         this.tiempo = tiempo;
-        this.vida = vida;
     }
-
+    
     // Getters
-    public Serpiente getSerpiente() {
-        return serpiente;
+    public Jugador getJugador() {
+        return jugador;
     }
-
+    
     public GestorFrutas getGestorFrutas() {
         return gestorFrutas;
     }
-
-    public int getPuntuacion() {
-        return puntuacion;
-    }
-
+    
     public float getPosElementosX() {
         return posElementosX;
     }
-
+    
     public float getPosElementosY() {
         return posElementosY;
     }
-
-    public Direcciones getDireccionActual() {
-        return direccionActual;
-    }
-
+    
     public float getTiempo() {
         return tiempo;
-    }
-
-    public int getVida() {
-        return vida;
     }
 }

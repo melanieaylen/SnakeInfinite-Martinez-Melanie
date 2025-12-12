@@ -15,6 +15,9 @@ import entradas.salidas.teclado.Entradas;
 import utiles.Recursos;
 import utiles.Render;
 
+/**
+ * PantallaMenu - Actualizada con opción de multijugador
+ */
 public class PantallaMenu implements Screen {
 
     // CONSTANTES
@@ -50,7 +53,7 @@ public class PantallaMenu implements Screen {
        
         sonidoBoton = Gdx.audio.newSound(Gdx.files.internal("sonidos/boton.ogg"));
         musica = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica.mp3"));
-        musica.setLooping(true); // ✅ Para que se repita automáticamente
+        musica.setLooping(true);
         musica.play();
 
         titulo = new Texto(Recursos.FUENTE, TAMANIO_TEXTO, Color.WHITE, Color.TEAL, -3, 3, false);
@@ -78,16 +81,16 @@ public class PantallaMenu implements Screen {
         subtitulo1.dibujarTexto("   Un Jugador", 360, 530);
         subtitulo2.dibujarTexto("   Multijugador", 360, 430);
         subtitulo3.dibujarTexto("   Configuracion", 360, 330);
-    	subtitulo4.dibujarTexto("   Salir", 360, 230);
+        subtitulo4.dibujarTexto("   Salir", 360, 230);
 
         if (opc == 1) {
             opcionElegida.dibujarTexto("> ", 330, 530);
         } else if (opc == 2) {
             opcionElegida.dibujarTexto("> ", 330, 430);
         } else if (opc == 3) {
-        	opcionElegida.dibujarTexto("> ", 330, 330);
+            opcionElegida.dibujarTexto("> ", 330, 330);
         } else if (opc == 4) {
-        	opcionElegida.dibujarTexto("> ", 330, 230);
+            opcionElegida.dibujarTexto("> ", 330, 230);
         }
         Render.batch.end();
     }
@@ -123,16 +126,19 @@ public class PantallaMenu implements Screen {
         }
 
         if (entrada.isEnter()) {
-        	sonidoBoton.play();
+            sonidoBoton.play();
             if (opc == 1) {
-      		  
+                // Un jugador
                 Render.app.setScreen(new PantallaJuego());
             } else if (opc == 2) {
-                Render.app.setScreen(new PantallaEjemplo());
+                // Multijugador - IR A PANTALLA SALA
+                Render.app.setScreen(new PantallaSala());
             } else if (opc == 3) {
-            	Render.app.setScreen(new PantallaConfig());
+                // Configuración
+                Render.app.setScreen(new PantallaConfig());
             } else if (opc == 4) {
-            	Gdx.app.exit();
+                // Salir
+                Gdx.app.exit();
             }
         }
     }
@@ -149,12 +155,12 @@ public class PantallaMenu implements Screen {
             subtitulo3.setColor(Color.WHITE);
             subtitulo4.setColor(Color.WHITE);
         } else if (opc == 3) {
-        	subtitulo1.setColor(Color.WHITE);
+            subtitulo1.setColor(Color.WHITE);
             subtitulo2.setColor(Color.WHITE);
             subtitulo3.setColor(Color.SKY);
             subtitulo4.setColor(Color.WHITE);
         } else if (opc == 4) {
-        	subtitulo1.setColor(Color.WHITE);
+            subtitulo1.setColor(Color.WHITE);
             subtitulo2.setColor(Color.WHITE);
             subtitulo3.setColor(Color.WHITE);
             subtitulo4.setColor(Color.SKY);
@@ -176,26 +182,24 @@ public class PantallaMenu implements Screen {
 
     @Override
     public void hide() {
-        // ✅ CLAVE: Se llama cuando cambias de pantalla
-        // Aquí pausas o detienes la música
         if (musica != null && musica.isPlaying()) {
-            musica.stop(); // Para detener completamente
-            // O usa musica.pause() si quieres reanudarla después
+            musica.stop();
         }
     }
 
     @Override
     public void dispose() {
-        // ✅ Liberar recursos cuando ya no se necesiten
         if (musica != null) {
             musica.dispose();
         }
         if (sonidoBoton != null) {
-	            sonidoBoton.dispose();
-	        }
+            sonidoBoton.dispose();
+        }
         if (titulo != null) titulo.dispose();
         if (subtitulo1 != null) subtitulo1.dispose();
         if (subtitulo2 != null) subtitulo2.dispose();
+        if (subtitulo3 != null) subtitulo3.dispose();
+        if (subtitulo4 != null) subtitulo4.dispose();
         if (opcionElegida != null) opcionElegida.dispose();
     }
 }

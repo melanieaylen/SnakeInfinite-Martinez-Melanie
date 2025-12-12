@@ -2,7 +2,6 @@ package pantallas;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -16,8 +15,9 @@ import entradas.salidas.teclado.Entradas;
 import utiles.Recursos;
 import utiles.Render;
 
-// ... imports ...
-
+/**
+ * PantallaPausa refactorizada
+ */
 public class PantallaPausa implements Screen {
 
     private final int TAMANIO_TEXTO = 120;
@@ -29,20 +29,23 @@ public class PantallaPausa implements Screen {
     private Texto subtitulo1;
     private Texto subtitulo2;
     private Texto opcionElegida;
-    private Entradas entrada = new Entradas();
+    
+    private Entradas entrada;
     private int opc = 1;
     private float tiempo = 0;
     private float a = 0;
-    private Music musica; 
-    private Sound sonidoBoton; 
+    
+    private Sound sonidoBoton;
     
     private OrthographicCamera camara;
     private Viewport viewport;
     
-    // ✅ Estado del juego
+    // Estado del juego
     private EstadoJuego estadoJuego;
     
-    // Constructor que recibe el estado
+    /**
+     * Constructor que recibe el estado guardado
+     */
     public PantallaPausa(EstadoJuego estado) {
         this.estadoJuego = estado;
     }
@@ -52,13 +55,15 @@ public class PantallaPausa implements Screen {
         menu = new Imagen(Recursos.FONDO_MENU);
         serpiente = new Imagen(Recursos.ICONO);
         serpiente.setParametros(720, 140, 130, 130);
+        
+        entrada = new Entradas();
         Gdx.input.setInputProcessor(entrada);
+        
         camara = new OrthographicCamera();
         viewport = new FitViewport(1440, 900, camara);
-        musica = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musicaJuego.mp3"));
-        musica.setLooping(true); 
-        musica.play();
-        sonidoBoton = Gdx.audio.newSound(Gdx.files.internal("sonidos/boton.ogg"));
+        
+        sonidoBoton = Gdx.audio.newSound(Gdx.files.internal(Recursos.SONIDO_BOTON));
+        
         titulo = new Texto(Recursos.FUENTE, TAMANIO_TEXTO, Color.WHITE, Color.TEAL, -3, 3, false);
         subtitulo1 = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
         subtitulo2 = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
@@ -69,6 +74,7 @@ public class PantallaPausa implements Screen {
     public void render(float delta) {
         Render.limpiarPantalla(0, 0, 0);
         viewport.apply();
+        
         procesarTransparencia();
         procesarEntradas(delta);
         actualizarInterfaz();
@@ -79,13 +85,14 @@ public class PantallaPausa implements Screen {
         
         titulo.dibujarTexto("PAUSA", 550, 750);
         subtitulo1.dibujarTexto(" Continuar", 620, 530);
-        subtitulo2.dibujarTexto("   Volver a inicio", 540, 400);
+        subtitulo2.dibujarTexto("   Volver al MenÃº", 540, 400);
         
         if (opc == 1) {
             opcionElegida.dibujarTexto("> ", 540, 530);
         } else if (opc == 2) {
             opcionElegida.dibujarTexto("> ", 540, 400);
         }
+        
         Render.batch.end();
     }
 
@@ -121,12 +128,12 @@ public class PantallaPausa implements Screen {
         }
 
         if (entrada.isEnter()) {
-        	sonidoBoton.play();
+            sonidoBoton.play();
             if (opc == 1) {
-                // ✅ Continuar - restaurar estado guardado
+                // Continuar - restaurar estado
                 Render.app.setScreen(new PantallaJuego(estadoJuego));
             } else if (opc == 2) {
-                // Salir al menú - descartar estado
+                // Volver al menÃº
                 Render.app.setScreen(new PantallaMenu());
             }
         }
@@ -149,35 +156,24 @@ public class PantallaPausa implements Screen {
 
     @Override
     public void pause() {
-    	
     }
     
     @Override
     public void resume() {
-    	
     }
     
     @Override
     public void hide() {
-        // ✅ CLAVE: Se llama cuando cambias de pantalla
-        // Aquí pausas o detienes la música
-        if (musica != null && musica.isPlaying()) {
-            musica.stop(); // Para detener completamente
-            // O usa musica.pause() si quieres reanudarla después
-        }
     }
     
     @Override
     public void dispose() {
-    	 if (musica != null) {
-             musica.dispose();
-         }
-         if (sonidoBoton != null) {
- 	            sonidoBoton.dispose();
- 	        }
-        titulo.dispose();
-        subtitulo1.dispose();
-        subtitulo2.dispose();
-        opcionElegida.dispose();
+        if (sonidoBoton != null) {
+            sonidoBoton.dispose();
+        }
+        if (titulo != null) titulo.dispose();
+        if (subtitulo1 != null) subtitulo1.dispose();
+        if (subtitulo2 != null) subtitulo2.dispose();
+        if (opcionElegida != null) opcionElegida.dispose();
     }
 }
