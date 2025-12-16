@@ -5,48 +5,36 @@ import com.badlogic.gdx.graphics.Color;
 public class ConfigJuego {
 	private static ConfigJuego instancia;
 
-	// Colores de la serpiente
 	private Color colorCabeza;
 	private Color colorCuerpo;
 
-	// Nombre del jugador
 	private String nombreJugador = "Jugador";
 
-	// Configuración de audio
 	private float volumenMusica = 0.7f;
 	private float volumenSonidos = 1.0f;
 	private boolean musicaActivada = true;
 	private boolean sonidosActivados = true;
 
-	// Paleta de colores optimizada para fondo rosa claro
 	public static final Color[][] PALETA_COLORES = {
-		// Negro + Maroon (clásico LibGDX)
 		{Color.BLACK, Color.MAROON},
 		
-		// Verde suave + Verde medio
 		{new Color(0.25f, 0.60f, 0.40f, 1), new Color(0.45f, 0.75f, 0.55f, 1)},
 		
-		// Púrpura equilibrado + Púrpura suave
 		{new Color(0.45f, 0.30f, 0.60f, 1), new Color(0.65f, 0.50f, 0.75f, 1)},
 		
-		// Azul medio + Azul suave
 		{new Color(0.25f, 0.45f, 0.70f, 1), new Color(0.45f, 0.65f, 0.85f, 1)},
 		
-		// Rojo suave + Rosa fuerte
 		{new Color(0.70f, 0.25f, 0.35f, 1), new Color(0.85f, 0.45f, 0.55f, 1)},
 		
-		// Naranja cálido + Naranja suave
 		{new Color(0.80f, 0.45f, 0.20f, 1), new Color(0.90f, 0.65f, 0.45f, 1)},
 		
-		// Turquesa moderado + Turquesa claro
 		{new Color(0.20f, 0.60f, 0.65f, 1), new Color(0.45f, 0.75f, 0.80f, 1)},
 		
-		// Dorado suave + Dorado claro
 		{new Color(0.75f, 0.60f, 0.25f, 1), new Color(0.90f, 0.80f, 0.50f, 1)}
 	};
 	
 	public static final String[] NOMBRES_COLORES = {
-		"Clásico",
+		"Clasico",
 		"Verde",
 		"Violeta",
 		"Azul",
@@ -59,7 +47,6 @@ public class ConfigJuego {
 	private int indiceColorSeleccionado = 0;
 
 	private ConfigJuego() {
-		// Color por defecto (Clásico - Negro y Maroon)
 		colorCabeza = Color.BLACK;
 		colorCuerpo = Color.MAROON;
 	}
@@ -96,7 +83,6 @@ public class ConfigJuego {
 		return indiceColorSeleccionado;
 	}
 
-	// Métodos para nombre del jugador
 	public String getNombreJugador() {
 		return nombreJugador;
 	}
@@ -107,7 +93,6 @@ public class ConfigJuego {
 		}
 	}
 
-	// Métodos de audio
 	public float getVolumenMusica() {
 		return volumenMusica;
 	}

@@ -44,7 +44,7 @@ public class PantallaMenu implements Screen {
 
     @Override
     public void show() {
-        menu = new Imagen(Recursos.FONDO_MENU);
+        menu = new Imagen(Recursos.FONDO);
         serpiente = new Imagen(Recursos.ICONO);
         serpiente.setParametros(900, 200, 300, 300);
         Gdx.input.setInputProcessor(entrada);

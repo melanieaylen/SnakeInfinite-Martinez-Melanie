@@ -28,7 +28,7 @@ import utiles.Render;
 public class PantallaJuegoMultijugador implements Screen {
 
 	private final int TAMANIO_ELEMENTOS = 30;
-	private final int MAX_JUGADORES = 2; // ✅ CAMBIO: De 3 a 2 jugadores
+	private final int MAX_JUGADORES = 2;
 
 	private HiloCliente hiloCliente;
 	private int miNumeroJugador;
@@ -52,14 +52,17 @@ public class PantallaJuegoMultijugador implements Screen {
 
 	private boolean juegoTerminado = false;
 	private boolean alguienSeDesconecto = false;
-	private int[] puntuaciones = { 0, 0 }; // ✅ CAMBIO: Array de 2
-	private int[] vidas = { 3, 3 }; // ✅ CAMBIO: Array de 2
+	private int[] puntuaciones = { 0, 0 };
+	private int[] vidas = { 3, 3 };
 	private Direcciones ultimaDireccion = Direcciones.NINGUNA;
 
 	private long ultimoCambioDireccion = 0;
 	private static final long COOLDOWN_DIRECCION = 50;
 
 	private int actualizacionesRecibidas = 0;
+	
+	// ✅ NUEVO: Variable para almacenar al ganador real
+	private int numeroGanador = -1;
 
 	public PantallaJuegoMultijugador(HiloCliente hiloCliente, int miNumeroJugador) {
 		this.hiloCliente = hiloCliente;
@@ -74,8 +77,8 @@ public class PantallaJuegoMultijugador implements Screen {
 	public void show() {
 		textoPuntuacion = new Texto(Recursos.TEXTO, 28, Color.WHITE, Color.BLACK, -4, 4, true);
 		textoVidas = new Texto(Recursos.TEXTO, 28, Color.WHITE, Color.BLACK, -4, 4, true);
-		textoGanador = new Texto(Recursos.FUENTE, 60, Color.YELLOW, Color.BLACK, -4, 4, true);
-		textoDesconectado = new Texto(Recursos.FUENTE, 50, Color.RED, Color.BLACK, -4, 4, true);
+		textoGanador = new Texto(Recursos.TEXTO, 60, Color.YELLOW, Color.BLACK, -4, 4, true);
+		textoDesconectado = new Texto(Recursos.TEXTO, 50, Color.RED, Color.BLACK, -4, 4, true);
 
 		grilla = new Grilla(TAMANIO_ELEMENTOS);
 		sonidoComer = Gdx.audio.newSound(Gdx.files.internal(Recursos.SONIDO_COMER));
@@ -178,7 +181,6 @@ public class PantallaJuegoMultijugador implements Screen {
 		StringBuilder sbPuntos = new StringBuilder();
 		StringBuilder sbVidas = new StringBuilder();
 
-		// ✅ CAMBIO: Iterar solo 2 jugadores
 		for (int i = 0; i < MAX_JUGADORES; i++) {
 			if (serpientes.containsKey(i + 1)) {
 				if (sbPuntos.length() > 0) {
@@ -196,27 +198,13 @@ public class PantallaJuegoMultijugador implements Screen {
 		if (alguienSeDesconecto) {
 			textoDesconectado.dibujarTexto("Un jugador se desconecto", Config.ANCHO / 2 - 280, Config.ALTO / 2 + 50);
 			textoDesconectado.dibujarTexto("Volviendo al menu...", Config.ANCHO / 2 - 200, Config.ALTO / 2 - 20);
-		} else if (juegoTerminado) {
-			textoGanador.dibujarTexto("Jugador " + obtenerGanador() + " GANO!", Config.ANCHO / 2 - 250,
+		} else if (juegoTerminado && numeroGanador > 0) {
+			// ✅ CORREGIDO: Usar el ganador real del servidor
+			textoGanador.dibujarTexto("Jugador " + numeroGanador + " GANO!", Config.ANCHO / 2 - 250,
 					Config.ALTO / 2);
 		}
 
 		Render.batch.end();
-	}
-
-	private int obtenerGanador() {
-		int maxVidas = -1;
-		int ganador = 1;
-
-		// ✅ CAMBIO: Verificar solo 2 jugadores
-		for (int i = 0; i < MAX_JUGADORES; i++) {
-			if (vidas[i] > maxVidas) {
-				maxVidas = vidas[i];
-				ganador = i + 1;
-			}
-		}
-
-		return ganador;
 	}
 
 	public void cuandoActualizanSerpiente(int numeroJugador, String datosSegmentos) {
@@ -329,6 +317,7 @@ public class PantallaJuegoMultijugador implements Screen {
 
 	public void cuandoTerminaJuego(int ganador) {
 		juegoTerminado = true;
+		numeroGanador = ganador; // ✅ CORREGIDO: Guardar el ganador del servidor
 		System.out.println("[Cliente J" + miNumeroJugador + "] Juego terminado, gano J" + ganador);
 
 		new Thread(() -> {

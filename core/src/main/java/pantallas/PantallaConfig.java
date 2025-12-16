@@ -20,7 +20,6 @@ import utiles.Render;
 
 public class PantallaConfig implements Screen {
 	
-	// CONSTANTES
 	private final int TAMANIO_TEXTO = 120;
 	private final int TAMANIO_SUB = 60;
 	
@@ -51,6 +50,9 @@ public class PantallaConfig implements Screen {
 	private boolean editandoNombre = false;
 	private String nombreTemporal = "";
 	
+	// ✅ NUEVO: Control de tecla Enter
+	private boolean enterPresionadoAntes = false;
+	
 	// Para vista previa de la serpiente
 	private final int TAMANIO_PREVIEW = 40;
 	private final int SEGMENTOS_PREVIEW = 5;
@@ -63,7 +65,7 @@ public class PantallaConfig implements Screen {
 
 	@Override
 	public void show() {
-		menu = new Imagen(Recursos.FONDO_MENU);
+		menu = new Imagen(Recursos.FONDO);
 		serpiente = new Imagen(Recursos.ICONO);
 		serpiente.setParametros(720, 140, 130, 130);
 		entrada = new Entradas();
@@ -213,8 +215,10 @@ public class PantallaConfig implements Screen {
 			}
 		}
 		
-		// Confirmar selección
-		if (entrada.isEnter()) {
+		// ✅ CORREGIDO: Control de Enter con detección de flanco
+		boolean enterAhora = entrada.isEnter();
+		
+		if (enterAhora && !enterPresionadoAntes) {
 			sonidoBoton.play();
 			
 			if (opcionSeleccionada == 1) {
@@ -230,6 +234,8 @@ public class PantallaConfig implements Screen {
 				Render.app.setScreen(new PantallaMenu());
 			}
 		}
+		
+		enterPresionadoAntes = enterAhora;
 	}
 	
 	private void procesarEdicionNombre() {
@@ -256,8 +262,8 @@ public class PantallaConfig implements Screen {
 			}
 		}
 		
-		// Confirmar
-		if (entrada.isEnter()) {
+		// ✅ CORREGIDO: Usar isKeyJustPressed en lugar de entrada.isEnter()
+		if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
 			if (nombreTemporal.trim().length() > 0) {
 				config.setNombreJugador(nombreTemporal.trim());
 			}

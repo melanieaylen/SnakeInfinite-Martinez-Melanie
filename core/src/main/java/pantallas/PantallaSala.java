@@ -53,7 +53,7 @@ public class PantallaSala implements Screen {
 
     @Override
     public void show() {
-        fondo = new Imagen(Recursos.FONDO_MENU);
+        fondo = new Imagen(Recursos.FONDO);
         titulo = new Texto(Recursos.FUENTE, 80, Color.WHITE, Color.TEAL, -3, 3, false);
         textoEstado = new Texto(Recursos.FUENTE, 50, Color.YELLOW, Color.BLACK, -4, 4, true);
         textoJugador = new Texto(Recursos.FUENTE, 50, Color.SKY, Color.BLACK, -4, 4, true);

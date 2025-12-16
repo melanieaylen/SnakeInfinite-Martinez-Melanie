@@ -52,7 +52,7 @@ public class PantallaPausa implements Screen {
     
     @Override
     public void show() {
-        menu = new Imagen(Recursos.FONDO_MENU);
+        menu = new Imagen(Recursos.FONDO);
         serpiente = new Imagen(Recursos.ICONO);
         serpiente.setParametros(720, 140, 130, 130);
         

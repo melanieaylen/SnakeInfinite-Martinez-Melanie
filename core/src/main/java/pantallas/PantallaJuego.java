@@ -24,9 +24,6 @@ import utiles.ConfigJuego;
 import utiles.Recursos;
 import utiles.Render;
 
-/**
- * ✅ ACTUALIZADA: Ahora pasa la puntuación al Game Over
- */
 public class PantallaJuego implements Screen, ControladorJuego {
 
     private final int TAMANIO_ELEMENTOS = 30;

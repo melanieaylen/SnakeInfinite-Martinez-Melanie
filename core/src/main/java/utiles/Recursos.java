@@ -3,11 +3,7 @@ package utiles;
 public abstract class Recursos {
     
     // Fondos
-    public static final String FONDO_MENU = "fondos/fondo.png";
-    public static final String FONDO_GRILLA = "fondos/fondoGrilla.png";
-    public static final String FONDO_JUEGO = "fondos/fondoJuego.png";
-    public static final String GAME_OVER = "fondos/gameOver.png";
-    
+    public static final String FONDO = "fondos/fondo.png";
     // Iconos
     public static final String ICONO = "otros/icono.png";
     

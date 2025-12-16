@@ -11,7 +11,6 @@ import utiles.Render;
 public class Principal extends Game {
 	
 	public void create() {
-		// Creo el objeto
 		Render.app = this;
 		Render.batch = new SpriteBatch();
 		Render.shaper = new ShapeRenderer();
