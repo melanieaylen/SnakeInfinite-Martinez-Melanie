@@ -15,9 +15,6 @@ import entradas.salidas.teclado.Entradas;
 import utiles.Recursos;
 import utiles.Render;
 
-/**
- * PantallaPausa refactorizada
- */
 public class PantallaPausa implements Screen {
 
     private final int TAMANIO_TEXTO = 120;
@@ -39,13 +36,9 @@ public class PantallaPausa implements Screen {
     
     private OrthographicCamera camara;
     private Viewport viewport;
-    
-    // Estado del juego
+
     private EstadoJuego estadoJuego;
     
-    /**
-     * Constructor que recibe el estado guardado
-     */
     public PantallaPausa(EstadoJuego estado) {
         this.estadoJuego = estado;
     }
@@ -85,7 +78,7 @@ public class PantallaPausa implements Screen {
         
         titulo.dibujarTexto("PAUSA", 550, 750);
         subtitulo1.dibujarTexto(" Continuar", 620, 530);
-        subtitulo2.dibujarTexto("   Volver al MenÃº", 540, 400);
+        subtitulo2.dibujarTexto("   Volver al Menu", 540, 400);
         
         if (opc == 1) {
             opcionElegida.dibujarTexto("> ", 540, 530);
@@ -130,10 +123,8 @@ public class PantallaPausa implements Screen {
         if (entrada.isEnter()) {
             sonidoBoton.play();
             if (opc == 1) {
-                // Continuar - restaurar estado
                 Render.app.setScreen(new PantallaJuego(estadoJuego));
             } else if (opc == 2) {
-                // Volver al menÃº
                 Render.app.setScreen(new PantallaMenu());
             }
         }

@@ -29,7 +29,6 @@ public class HiloCliente extends Thread {
     private int mensajesRecibidos = 0;
     private int miNumeroJugador = 0;
     
-    // CAMBIO: Contador de actualizaciones para 2 jugadores
     private int[] actualizacionesPorJugador = new int[2];
 
     public HiloCliente(PantallaSala pantallaSala) {
@@ -79,7 +78,6 @@ public class HiloCliente extends Thread {
                 conexion.receive(paquete);
                 procesarMensaje(paquete);
             } catch (SocketTimeoutException e) {
-                // Timeout normal
             } catch (IOException e) {
                 if (!fin) {
                     System.err.println("Error al recibir paquete");
@@ -104,7 +102,6 @@ public class HiloCliente extends Thread {
         String mensaje = (new String(paquete.getData())).trim();
         mensajesRecibidos++;
         
-        // DEBUGGING: Log cada 100 mensajes
         if (mensajesRecibidos % 100 == 0) {
             System.out.println("[Cliente J" + miNumeroJugador + "] Estadisticas:");
             System.out.println("   Total mensajes recibidos: " + mensajesRecibidos);
@@ -116,7 +113,6 @@ public class HiloCliente extends Thread {
             }
         }
         
-        // Log de mensajes importantes
         if (!mensaje.startsWith("ActualizarSerpiente") && !mensaje.equals("Heartbeat")) {
             System.out.println("[Cliente J" + miNumeroJugador + " #" + mensajesRecibidos + "] " + 
                              mensaje.substring(0, Math.min(80, mensaje.length())));
@@ -252,7 +248,6 @@ public class HiloCliente extends Thread {
             int numeroJugador = Integer.parseInt(datos.substring(0, primerDosPuntos));
             String segmentos = datos.substring(primerDosPuntos + 1);
             
-            // DEBUGGING: Contar actualizaciones
             if (numeroJugador >= 1 && numeroJugador <= 2) {
                 actualizacionesPorJugador[numeroJugador - 1]++;
                 

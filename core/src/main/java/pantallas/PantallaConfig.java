@@ -45,15 +45,12 @@ public class PantallaConfig implements Screen {
 	private int opcionSeleccionada = 1;
 	private float tiempoEntrada = 0;
 	private float transparencia = 0;
-	
-	// Para editar el nombre
+
 	private boolean editandoNombre = false;
 	private String nombreTemporal = "";
-	
-	// ✅ NUEVO: Control de tecla Enter
+
 	private boolean enterPresionadoAntes = false;
-	
-	// Para vista previa de la serpiente
+
 	private final int TAMANIO_PREVIEW = 40;
 	private final int SEGMENTOS_PREVIEW = 5;
 	
@@ -100,7 +97,7 @@ public class PantallaConfig implements Screen {
 		Render.batch.setProjectionMatrix(camara.combined);
 		Render.shaper.setProjectionMatrix(camara.combined);
 		
-		// Dibujar fondo
+
 		Render.batch.begin();
 		menu.dibujar();
 		Render.batch.end();
@@ -133,7 +130,6 @@ public class PantallaConfig implements Screen {
 			opcionElegida.dibujarTexto("> ", 400, 270);
 		}
 		
-		// Instrucción cuando se edita nombre
 		if (editandoNombre) {
 			textoNombre.dibujarTexto("Escribe tu nombre (Enter para confirmar)", 320, 580);
 		}
@@ -173,13 +169,11 @@ public class PantallaConfig implements Screen {
 	private void procesarEntradas(float delta) {
 		tiempoEntrada += delta;
 		
-		// Si estamos editando el nombre
 		if (editandoNombre) {
 			procesarEdicionNombre();
 			return;
 		}
-		
-		// Navegación normal
+
 		if (entrada.isAbajo() && tiempoEntrada > 0.2f) {
 			tiempoEntrada = 0;
 			opcionSeleccionada++;
@@ -215,7 +209,6 @@ public class PantallaConfig implements Screen {
 			}
 		}
 		
-		// ✅ CORREGIDO: Control de Enter con detección de flanco
 		boolean enterAhora = entrada.isEnter();
 		
 		if (enterAhora && !enterPresionadoAntes) {
@@ -239,7 +232,6 @@ public class PantallaConfig implements Screen {
 	}
 	
 	private void procesarEdicionNombre() {
-		// Capturar teclas para el nombre
 		for (int i = Input.Keys.A; i <= Input.Keys.Z; i++) {
 			if (Gdx.input.isKeyJustPressed(i)) {
 				if (nombreTemporal.length() < 15) {
@@ -261,8 +253,7 @@ public class PantallaConfig implements Screen {
 				nombreTemporal = nombreTemporal.substring(0, nombreTemporal.length() - 1);
 			}
 		}
-		
-		// ✅ CORREGIDO: Usar isKeyJustPressed en lugar de entrada.isEnter()
+
 		if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
 			if (nombreTemporal.trim().length() > 0) {
 				config.setNombreJugador(nombreTemporal.trim());

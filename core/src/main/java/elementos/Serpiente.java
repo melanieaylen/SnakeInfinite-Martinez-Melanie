@@ -23,10 +23,8 @@ public class Serpiente {
 		
 		for (int i = 0; i < tamanioActual; i++) {
 			if (i == 0) {
-				// Cabeza - usa el color configurado
 				Render.shaper.setColor(config.getColorCabeza());
 			} else {
-				// Cuerpo - usa el color configurado
 				Render.shaper.setColor(config.getColorCuerpo());
 			}
 			Render.shaper.rect(posiciones[i][0], posiciones[i][1], ancho, alto);
@@ -37,17 +35,14 @@ public class Serpiente {
 		float ultimaX = posiciones[tamanioActual - 1][0];
 		float ultimaY = posiciones[tamanioActual - 1][1];
 		
-		// Mover cuerpo
 		for (int i = tamanioActual - 1; i > 0; i--) {
 			posiciones[i][0] = posiciones[i - 1][0];
 			posiciones[i][1] = posiciones[i - 1][1];
 		}
 		
-		// Mover cabeza
 		posiciones[0][0] = nuevaX;
 		posiciones[0][1] = nuevaY;
 		
-		// crecer
 		if (debeCrecer) {
 			posiciones[tamanioActual][0] = ultimaX;
 			posiciones[tamanioActual][1] = ultimaY;

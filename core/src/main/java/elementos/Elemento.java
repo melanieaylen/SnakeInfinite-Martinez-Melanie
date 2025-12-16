@@ -17,11 +17,8 @@ public abstract class Elemento {
         this.alto = alto;
         this.limites = new Rectangle(posX, posY, ancho, alto);
     }
-    
-    //dibujar el elemento
-    public void dibujar(){
-    	
-    }
+ 
+    public void dibujar(){}
     
     public void setPosicion(float x, float y) {
         this.posX = x;
@@ -29,17 +26,16 @@ public abstract class Elemento {
         actualizarLimites();
     }
     
-    //Actualizar limites
+
     protected void actualizarLimites() {
         limites.set(posX, posY, ancho, alto);
     }
     
-    //Verificar colisiones
+
     public boolean colisionaCon(Elemento otro) {
         return limites.overlaps(otro.getLimites());
     }
     
-    //Verificar colision especifica
     public boolean colisionaConPosicion(float x, float y) {
         return posX == x && posY == y;
     }

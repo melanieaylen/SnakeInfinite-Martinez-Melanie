@@ -61,7 +61,6 @@ public class PantallaJuegoMultijugador implements Screen {
 
 	private int actualizacionesRecibidas = 0;
 	
-	// ✅ NUEVO: Variable para almacenar al ganador real
 	private int numeroGanador = -1;
 
 	public PantallaJuegoMultijugador(HiloCliente hiloCliente, int miNumeroJugador) {
@@ -199,7 +198,6 @@ public class PantallaJuegoMultijugador implements Screen {
 			textoDesconectado.dibujarTexto("Un jugador se desconecto", Config.ANCHO / 2 - 280, Config.ALTO / 2 + 50);
 			textoDesconectado.dibujarTexto("Volviendo al menu...", Config.ANCHO / 2 - 200, Config.ALTO / 2 - 20);
 		} else if (juegoTerminado && numeroGanador > 0) {
-			// ✅ CORREGIDO: Usar el ganador real del servidor
 			textoGanador.dibujarTexto("Jugador " + numeroGanador + " GANO!", Config.ANCHO / 2 - 250,
 					Config.ALTO / 2);
 		}
@@ -310,14 +308,13 @@ public class PantallaJuegoMultijugador implements Screen {
 			try {
 				puntuaciones[i] = Integer.parseInt(puntajes[i]);
 			} catch (NumberFormatException e) {
-				// Ignorar
 			}
 		}
 	}
 
 	public void cuandoTerminaJuego(int ganador) {
 		juegoTerminado = true;
-		numeroGanador = ganador; // ✅ CORREGIDO: Guardar el ganador del servidor
+		numeroGanador = ganador;
 		System.out.println("[Cliente J" + miNumeroJugador + "] Juego terminado, gano J" + ganador);
 
 		new Thread(() -> {

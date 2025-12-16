@@ -29,6 +29,7 @@ public class PantallaFinJuego implements Screen {
 	private Texto tituloGameOver;
 	private Texto textoPuntuacion;
 	private Texto textoRecord;
+	private Texto textoNuevoRecord;  
 	private Texto opcionReiniciar;
 	private Texto opcionMenu;
 	private Texto indicador;
@@ -52,17 +53,34 @@ public class PantallaFinJuego implements Screen {
 
 	private void cargarYCompararRecord() {
 		Preferences prefs = Gdx.app.getPreferences("SnakeInfiniteRecords");
+		 
+		 prefs.clear();
+	    prefs.flush();
 		recordActual = prefs.getInteger("recordPuntuacion", 0);
 
+		System.out.println("========================================");
+		System.out.println("VERIFICANDO RÉCORD:");
+		System.out.println("  Puntuación actual: " + puntuacionFinal);
+		System.out.println("  Récord anterior: " + recordActual);
+
+		// ✅ CORREGIDO: Comparación correcta y logs detallados
 		if (puntuacionFinal > recordActual) {
 			esNuevoRecord = true;
 			recordActual = puntuacionFinal;
 			prefs.putInteger("recordPuntuacion", recordActual);
 			prefs.flush();
-			System.out.println("Nuevo record guardado: " + recordActual + " puntos");
+			
+			System.out.println("  ¡NUEVO RÉCORD! " + recordActual + " puntos");
+			System.out.println("  Guardado en preferencias: SÍ");
 		} else {
-			System.out.println("Puntuacion: " + puntuacionFinal + " | Record actual: " + recordActual);
+			System.out.println("  No se superó el récord");
+			System.out.println("  Récord se mantiene en: " + recordActual);
 		}
+		
+		// ✅ NUEVO: Verificación adicional
+		int recordVerificado = prefs.getInteger("recordPuntuacion", -1);
+		System.out.println("  Verificación de guardado: " + recordVerificado);
+		System.out.println("========================================");
 	}
 
 	@Override
@@ -86,6 +104,7 @@ public class PantallaFinJuego implements Screen {
 		tituloGameOver = new Texto(Recursos.FUENTE, TAMANIO_TEXTO, Color.RED, Color.BLACK, -4, 4, true);
 		textoPuntuacion = new Texto(Recursos.TEXTO, TAMANIO_SUB + 10, Color.WHITE, Color.BLACK, -4, 4, true);
 		textoRecord = new Texto(Recursos.TEXTO, TAMANIO_SUB, Color.GOLD, Color.BLACK, -4, 4, true);
+		textoNuevoRecord = new Texto(Recursos.TEXTO, TAMANIO_SUB - 5, Color.YELLOW, Color.BLACK, -4, 4, true);
 		opcionReiniciar = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
 		opcionMenu = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
 		indicador = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.SKY, Color.BLACK, -4, 4, true);
@@ -112,15 +131,24 @@ public class PantallaFinJuego implements Screen {
 
 		textoPuntuacion.dibujarTexto("Puntuacion: " + puntuacionFinal, 480, 600);
 
-		textoRecord.dibujarTexto("Record: " + recordActual, 580, 540);
+		// ✅ MEJORADO: Mostrar récord con indicador visual si es nuevo
+		if (esNuevoRecord) {
+			textoRecord.dibujarTexto("¡NUEVO RECORD: " + recordActual + "!", 440, 540);
+			// Texto adicional parpadeante
+			if ((int)(System.currentTimeMillis() / 500) % 2 == 0) {
+				textoNuevoRecord.dibujarTexto("★ ¡FELICIDADES! ★", 480, 490);
+			}
+		} else {
+			textoRecord.dibujarTexto("Record: " + recordActual, 580, 540);
+		}
 
-		opcionReiniciar.dibujarTexto("   Jugar de nuevo", 480, 440);
-		opcionMenu.dibujarTexto("   Volver al menu", 485, 360);
+		opcionReiniciar.dibujarTexto("   Jugar de nuevo", 480, 420);
+		opcionMenu.dibujarTexto("   Volver al menu", 485, 340);
 
 		if (opcionSeleccionada == 1) {
-			indicador.dibujarTexto("> ", 440, 440);
+			indicador.dibujarTexto("> ", 440, 420);
 		} else {
-			indicador.dibujarTexto("> ", 440, 360);
+			indicador.dibujarTexto("> ", 440, 340);
 		}
 		Render.batch.end();
 	}
@@ -204,6 +232,8 @@ public class PantallaFinJuego implements Screen {
 			textoPuntuacion.dispose();
 		if (textoRecord != null)
 			textoRecord.dispose();
+		if (textoNuevoRecord != null)
+			textoNuevoRecord.dispose();
 		if (opcionReiniciar != null)
 			opcionReiniciar.dispose();
 		if (opcionMenu != null)

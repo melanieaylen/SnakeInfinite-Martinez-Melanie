@@ -17,25 +17,21 @@ public class Grilla {
     }
     
     public void dibujarGrilla(OrthographicCamera camara) {
-        // Calcular qué parte de la grilla es visible
         float posCamX = camara.position.x;
         float posCamY = camara.position.y;
         float medioX = camara.viewportWidth / 2;
         float medioY = camara.viewportHeight / 2;
         
-        // Bordes de la pantalla
         float bordeIzquierdo = posCamX - medioX;
         float bordeDerecho = posCamX + medioX;
         float bordeInferior = posCamY - medioY;
         float bordeSuperior = posCamY + medioY;
         
-        // Calcular qué celdas dibujar
         int inicioX = (int)(bordeIzquierdo / tamanioCelda) - 2; 
         int finX = (int)(bordeDerecho / tamanioCelda) + 2;   
         int inicioY = (int)(bordeInferior / tamanioCelda) - 2;
         int finY = (int)(bordeSuperior / tamanioCelda) + 2;
         
-        // Dibujar celdas en patrón de tablero de ajedrez
         for (int x = inicioX; x <= finX; x++) {
             for (int y = inicioY; y <= finY; y++) {
                 // Alternar colores

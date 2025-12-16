@@ -42,7 +42,6 @@ public class SerpienteRemota {
                     float y = Float.parseFloat(coords[1]);
                     segmentos.add(new float[]{x, y});
                 } catch (NumberFormatException e) {
-                    // Ignorar segmentos mal formateados
                 }
             }
         }

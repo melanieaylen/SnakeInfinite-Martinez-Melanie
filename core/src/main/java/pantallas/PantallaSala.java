@@ -17,9 +17,6 @@ import utiles.ConfigJuego;
 import utiles.Recursos;
 import utiles.Render;
 
-/**
- * ✅ ACTUALIZADA: Para 2 jugadores máximo
- */
 public class PantallaSala implements Screen {
 
     private Imagen fondo;
@@ -43,7 +40,6 @@ public class PantallaSala implements Screen {
     private boolean juegoIniciado = false;
     private boolean servidorLleno = false;
     
-    // ✅ CAMBIO: Array para 2 jugadores
     private String[] nombresJugadores = new String[2];
     private int cantidadJugadoresConectados = 0;
 
@@ -108,7 +104,6 @@ public class PantallaSala implements Screen {
         titulo.dibujarTexto("Multijugador", 350, 800);
 
         if (servidorLleno) {
-            // ✅ CAMBIO: Mensaje para 2 jugadores
             textoEstado.dibujarTexto("Servidor lleno (2/2 jugadores)", 320, 500);
             textoInfo.dibujarTexto("Intenta conectarte mas tarde", 420, 400);
         } else if (!conectado) {
@@ -116,17 +111,14 @@ public class PantallaSala implements Screen {
             textoInfo.dibujarTexto("Asegurate de que el servidor este ejecutandose", 300, 450);
             textoInfo.dibujarTexto("Tu nombre: " + ConfigJuego.getInstancia().getNombreJugador(), 420, 350);
         } else {
-            // Mostrar mi información
             textoJugador.dibujarTexto("Eres: Jugador #" + miNumeroJugador, 500, 600);
             textoNombre.dibujarTexto(ConfigJuego.getInstancia().getNombreJugador(), 530, 545);
             
-            // Mostrar jugadores conectados
             textoJugadoresConectados.dibujarTexto("Jugadores conectados:", 480, 470);
             
             int yInicial = 420;
             int espaciado = 40;
             
-            // ✅ CAMBIO: Iterar solo 2 jugadores
             for (int i = 0; i < 2; i++) {
                 if (nombresJugadores[i] != null && !nombresJugadores[i].isEmpty()) {
                     String linea = (i + 1) + ". " + nombresJugadores[i];
@@ -143,7 +135,6 @@ public class PantallaSala implements Screen {
             
             int yFinal = yInicial - (cantidadJugadoresConectados * espaciado) - 30;
             textoEspera.dibujarTexto("Esperando jugadores" + obtenerPuntos(), 420, yFinal);
-            // ✅ CAMBIO: Texto actualizado para 2 jugadores
             textoInfo.dibujarTexto("Se requieren 2 jugadores", 450, yFinal - 40);
         }
 
@@ -200,7 +191,6 @@ public class PantallaSala implements Screen {
         String[] nombres = datosNombres.split("\\|");
         cantidadJugadoresConectados = 0;
         
-        // ✅ CAMBIO: Procesar solo 2 jugadores
         for (int i = 0; i < Math.min(nombres.length, 2); i++) {
             if (nombres[i] != null && !nombres[i].trim().isEmpty()) {
                 nombresJugadores[i] = nombres[i].trim();

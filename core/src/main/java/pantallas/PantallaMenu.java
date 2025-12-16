@@ -15,9 +15,6 @@ import entradas.salidas.teclado.Entradas;
 import utiles.Recursos;
 import utiles.Render;
 
-/**
- * PantallaMenu - Actualizada con opción de multijugador
- */
 public class PantallaMenu implements Screen {
 
     // CONSTANTES
@@ -128,16 +125,12 @@ public class PantallaMenu implements Screen {
         if (entrada.isEnter()) {
             sonidoBoton.play();
             if (opc == 1) {
-                // Un jugador
                 Render.app.setScreen(new PantallaJuego());
             } else if (opc == 2) {
-                // Multijugador - IR A PANTALLA SALA
                 Render.app.setScreen(new PantallaSala());
             } else if (opc == 3) {
-                // Configuración
                 Render.app.setScreen(new PantallaConfig());
             } else if (opc == 4) {
-                // Salir
                 Gdx.app.exit();
             }
         }

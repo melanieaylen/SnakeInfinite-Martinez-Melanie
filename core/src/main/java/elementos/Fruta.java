@@ -2,7 +2,6 @@ package elementos;
 
 import utiles.Render;
 
-//Hereda de elemento
 public class Fruta extends Elemento {
     
     private TipoFruta tipo;

@@ -253,7 +253,6 @@ public class PantallaJuego implements Screen, ControladorJuego {
 
     @Override
     public void finDelJuego() {
-        // ✅ CAMBIO: Pasar la puntuación final
         Render.app.setScreen(new PantallaFinJuego(jugador.getPuntuacion()));
     }
 
