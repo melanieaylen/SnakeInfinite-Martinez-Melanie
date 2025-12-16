@@ -1,6 +1,7 @@
 package pantallas;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
@@ -31,7 +32,9 @@ public class PantallaConfig implements Screen {
 	private Texto titulo;
 	private Texto subtitulo1;
 	private Texto subtitulo2;
+	private Texto subtitulo3;
 	private Texto opcionElegida;
+	private Texto textoNombre;
 	
 	private OrthographicCamera camara;
 	private Viewport viewport;
@@ -40,9 +43,13 @@ public class PantallaConfig implements Screen {
 	private ConfigJuego config;
 	private int indiceColorActual;
 	
-	private int opc = 1;
-	private float tiempo = 0;
-	private float a = 0;
+	private int opcionSeleccionada = 1;
+	private float tiempoEntrada = 0;
+	private float transparencia = 0;
+	
+	// Para editar el nombre
+	private boolean editandoNombre = false;
+	private String nombreTemporal = "";
 	
 	// Para vista previa de la serpiente
 	private final int TAMANIO_PREVIEW = 40;
@@ -51,6 +58,7 @@ public class PantallaConfig implements Screen {
 	public PantallaConfig() {
 		config = ConfigJuego.getInstancia();
 		indiceColorActual = config.getIndiceColorSeleccionado();
+		nombreTemporal = config.getNombreJugador();
 	}
 
 	@Override
@@ -61,7 +69,6 @@ public class PantallaConfig implements Screen {
 		entrada = new Entradas();
 		Gdx.input.setInputProcessor(entrada);
 		
-		// Configurar cámara igual que en PantallaMenu
 		camara = new OrthographicCamera();
 		camara.setToOrtho(false, 1440, 900);
 		viewport = new FitViewport(1440, 900, camara);
@@ -74,7 +81,9 @@ public class PantallaConfig implements Screen {
 		titulo = new Texto(Recursos.FUENTE, TAMANIO_TEXTO, Color.WHITE, Color.TEAL, -3, 3, false);
 		subtitulo1 = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
 		subtitulo2 = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
+		subtitulo3 = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
 		opcionElegida = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.SKY, Color.BLACK, -4, 4, true);
+		textoNombre = new Texto(Recursos.FUENTE, TAMANIO_SUB-20, Color.WHITE, Color.BLACK, -4, 4, true);
 	}
 
 	@Override
@@ -89,28 +98,42 @@ public class PantallaConfig implements Screen {
 		Render.batch.setProjectionMatrix(camara.combined);
 		Render.shaper.setProjectionMatrix(camara.combined);
 		
-		// Primero dibujar el fondo
+		// Dibujar fondo
 		Render.batch.begin();
 		menu.dibujar();
 		Render.batch.end();
 		
-		// Luego la serpiente preview (con ShapeRenderer)
+		// Vista previa de la serpiente
 		dibujarPreviewSerpiente();
 		
-		// Finalmente los textos
+		// Textos
 		Render.batch.begin();
 		
-		// Título
 		titulo.dibujarTexto("Configuración", 300, 800);
 		
-		// Mostrar color actual con flechas
-		subtitulo1.dibujarTexto("<  " + ConfigJuego.NOMBRES_COLORES[indiceColorActual] + " >", 
-								550, 560);
+		// Opción 1: Nombre
+		subtitulo1.dibujarTexto("Nombre: " + nombreTemporal + 
+								(editandoNombre ? "_" : ""), 450, 650);
+		
+		// Opción 2: Color
+		subtitulo2.dibujarTexto("<  " + ConfigJuego.NOMBRES_COLORES[indiceColorActual] + " >", 
+								550, 480);
+		
+		// Opción 3: Volver
+		subtitulo3.dibujarTexto("Volver al Menú", 530, 270);
 
-		subtitulo2.dibujarTexto("Volver al Menu", 530, 270);
-
-		if (opc == 2) {
+		// Indicador de opción seleccionada
+		if (opcionSeleccionada == 1 && !editandoNombre) {
+			opcionElegida.dibujarTexto("> ", 350, 650);
+		} else if (opcionSeleccionada == 2) {
+			opcionElegida.dibujarTexto("> ", 450, 480);
+		} else if (opcionSeleccionada == 3) {
 			opcionElegida.dibujarTexto("> ", 400, 270);
+		}
+		
+		// Instrucción cuando se edita nombre
+		if (editandoNombre) {
+			textoNombre.dibujarTexto("Escribe tu nombre (Enter para confirmar)", 320, 580);
 		}
 		
 		Render.batch.end();
@@ -123,13 +146,10 @@ public class PantallaConfig implements Screen {
 		float centroX = 720 - (SEGMENTOS_PREVIEW * TAMANIO_PREVIEW) / 2;
 		float centroY = 360;
 		
-		// Dibujar segmentos de la serpiente
 		for (int i = 0; i < SEGMENTOS_PREVIEW; i++) {
 			if (i == 0) {
-				// Cabeza
 				Render.shaper.setColor(coloresActuales[0]);
 			} else {
-				// Cuerpo
 				Render.shaper.setColor(coloresActuales[1]);
 			}
 			
@@ -141,52 +161,54 @@ public class PantallaConfig implements Screen {
 	}
 	
 	private void procesarTransparencia() {
-		a += 0.012f;
-		if (a > 1) {
-			a = 1;
+		transparencia += 0.012f;
+		if (transparencia > 1) {
+			transparencia = 1;
 		}
-		menu.setTransparencia(a);
+		menu.setTransparencia(transparencia);
 	}
 	
 	private void procesarEntradas(float delta) {
-		tiempo += delta;
-		if (entrada.isAbajo()) {
-			if (tiempo > 0.2f) {
-				tiempo = 0;
-				opc++;
-				if (opc > 2) {
-					opc = 1;
-				}
+		tiempoEntrada += delta;
+		
+		// Si estamos editando el nombre
+		if (editandoNombre) {
+			procesarEdicionNombre();
+			return;
+		}
+		
+		// Navegación normal
+		if (entrada.isAbajo() && tiempoEntrada > 0.2f) {
+			tiempoEntrada = 0;
+			opcionSeleccionada++;
+			if (opcionSeleccionada > 3) {
+				opcionSeleccionada = 1;
 			}
 		}
 		
-		if (entrada.isArriba()) {
-			if (tiempo > 0.2f) {
-				tiempo = 0;
-				opc--;
-				if (opc < 1) {
-					opc = 2;
-				}
+		if (entrada.isArriba() && tiempoEntrada > 0.2f) {
+			tiempoEntrada = 0;
+			opcionSeleccionada--;
+			if (opcionSeleccionada < 1) {
+				opcionSeleccionada = 3;
 			}
 		}
-		if (opc == 1) {
-			if (entrada.isDerecha()) {
-				if (tiempo > 0.2f) {
-					tiempo = 0;
-					indiceColorActual++;
-					if (indiceColorActual >= ConfigJuego.PALETA_COLORES.length) {
-						indiceColorActual = 0;
-					}
+		
+		// Cambiar color con flechas
+		if (opcionSeleccionada == 2) {
+			if (entrada.isDerecha() && tiempoEntrada > 0.2f) {
+				tiempoEntrada = 0;
+				indiceColorActual++;
+				if (indiceColorActual >= ConfigJuego.PALETA_COLORES.length) {
+					indiceColorActual = 0;
 				}
 			}
 			
-			if (entrada.isIzquierda()) {
-				if (tiempo > 0.2f) {
-					tiempo = 0;
-					indiceColorActual--;
-					if (indiceColorActual < 0) {
-						indiceColorActual = ConfigJuego.PALETA_COLORES.length - 1;
-					}
+			if (entrada.isIzquierda() && tiempoEntrada > 0.2f) {
+				tiempoEntrada = 0;
+				indiceColorActual--;
+				if (indiceColorActual < 0) {
+					indiceColorActual = ConfigJuego.PALETA_COLORES.length - 1;
 				}
 			}
 		}
@@ -194,24 +216,83 @@ public class PantallaConfig implements Screen {
 		// Confirmar selección
 		if (entrada.isEnter()) {
 			sonidoBoton.play();
-			if (opc == 1) {
-				// Guardar el color seleccionado
+			
+			if (opcionSeleccionada == 1) {
+				// Editar nombre
+				editandoNombre = true;
+				nombreTemporal = config.getNombreJugador();
+			} else if (opcionSeleccionada == 2) {
+				// Guardar color
 				config.setColorPorIndice(indiceColorActual);
-			} else if (opc == 2) {
-				// Volver al menú (guardará automáticamente)
-				config.setColorPorIndice(indiceColorActual);
+			} else if (opcionSeleccionada == 3) {
+				// Volver al menú
+				guardarConfiguracion();
 				Render.app.setScreen(new PantallaMenu());
 			}
 		}
 	}
 	
+	private void procesarEdicionNombre() {
+		// Capturar teclas para el nombre
+		for (int i = Input.Keys.A; i <= Input.Keys.Z; i++) {
+			if (Gdx.input.isKeyJustPressed(i)) {
+				if (nombreTemporal.length() < 15) {
+					nombreTemporal += (char) ('A' + (i - Input.Keys.A));
+				}
+			}
+		}
+		
+		// Tecla espacio
+		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+			if (nombreTemporal.length() < 15 && nombreTemporal.length() > 0) {
+				nombreTemporal += " ";
+			}
+		}
+		
+		// Borrar
+		if (Gdx.input.isKeyJustPressed(Input.Keys.BACKSPACE)) {
+			if (nombreTemporal.length() > 0) {
+				nombreTemporal = nombreTemporal.substring(0, nombreTemporal.length() - 1);
+			}
+		}
+		
+		// Confirmar
+		if (entrada.isEnter()) {
+			if (nombreTemporal.trim().length() > 0) {
+				config.setNombreJugador(nombreTemporal.trim());
+			}
+			editandoNombre = false;
+		}
+		
+		// Cancelar
+		if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+			nombreTemporal = config.getNombreJugador();
+			editandoNombre = false;
+		}
+	}
+	
+	private void guardarConfiguracion() {
+		config.setColorPorIndice(indiceColorActual);
+		config.setNombreJugador(nombreTemporal.trim());
+	}
+	
 	private void actualizarInterfaz() {
-		if (opc == 1) {
+		if (editandoNombre) {
+			subtitulo1.setColor(Color.YELLOW);
+			subtitulo2.setColor(Color.WHITE);
+			subtitulo3.setColor(Color.WHITE);
+		} else if (opcionSeleccionada == 1) {
 			subtitulo1.setColor(Color.SKY);
 			subtitulo2.setColor(Color.WHITE);
-		} else if (opc == 2) {
+			subtitulo3.setColor(Color.WHITE);
+		} else if (opcionSeleccionada == 2) {
 			subtitulo1.setColor(Color.WHITE);
 			subtitulo2.setColor(Color.SKY);
+			subtitulo3.setColor(Color.WHITE);
+		} else if (opcionSeleccionada == 3) {
+			subtitulo1.setColor(Color.WHITE);
+			subtitulo2.setColor(Color.WHITE);
+			subtitulo3.setColor(Color.SKY);
 		}
 	}
 
@@ -221,12 +302,10 @@ public class PantallaConfig implements Screen {
 	}
 
 	@Override
-	public void pause() {
-	}
+	public void pause() {}
 
 	@Override
-	public void resume() {
-	}
+	public void resume() {}
 
 	@Override
 	public void hide() {
@@ -237,15 +316,13 @@ public class PantallaConfig implements Screen {
 
 	@Override
 	public void dispose() {
-		if (musica != null) {
-			musica.dispose();
-		}
-		if (sonidoBoton != null) {
-			sonidoBoton.dispose();
-		}
+		if (musica != null) musica.dispose();
+		if (sonidoBoton != null) sonidoBoton.dispose();
 		if (titulo != null) titulo.dispose();
 		if (subtitulo1 != null) subtitulo1.dispose();
 		if (subtitulo2 != null) subtitulo2.dispose();
+		if (subtitulo3 != null) subtitulo3.dispose();
 		if (opcionElegida != null) opcionElegida.dispose();
+		if (textoNombre != null) textoNombre.dispose();
 	}
 }

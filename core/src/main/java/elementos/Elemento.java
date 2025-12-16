@@ -2,10 +2,6 @@ package elementos;
 
 import com.badlogic.gdx.math.Rectangle;
 
-/**
- * Clase base para todos los elementos del juego
- * Similar al Element del Pong, pero adaptado para Snake
- */
 public abstract class Elemento {
     
     protected float posX;
@@ -22,37 +18,28 @@ public abstract class Elemento {
         this.limites = new Rectangle(posX, posY, ancho, alto);
     }
     
-    /**
-     * Método abstracto para dibujar el elemento
-     */
-    public abstract void dibujar();
+    //dibujar el elemento
+    public void dibujar(){
+    	
+    }
     
-    /**
-     * Actualiza la posición del elemento
-     */
     public void setPosicion(float x, float y) {
         this.posX = x;
         this.posY = y;
         actualizarLimites();
     }
     
-    /**
-     * Actualiza los límites del rectángulo de colisión
-     */
+    //Actualizar limites
     protected void actualizarLimites() {
         limites.set(posX, posY, ancho, alto);
     }
     
-    /**
-     * Verifica colisión con otro elemento
-     */
+    //Verificar colisiones
     public boolean colisionaCon(Elemento otro) {
         return limites.overlaps(otro.getLimites());
     }
     
-    /**
-     * Verifica colisión con una posición específica
-     */
+    //Verificar colision especifica
     public boolean colisionaConPosicion(float x, float y) {
         return posX == x && posY == y;
     }

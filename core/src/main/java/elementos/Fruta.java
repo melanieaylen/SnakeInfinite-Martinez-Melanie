@@ -2,9 +2,7 @@ package elementos;
 
 import utiles.Render;
 
-/**
- * Clase Fruta refactorizada - ahora hereda de Elemento
- */
+//Hereda de elemento
 public class Fruta extends Elemento {
     
     private TipoFruta tipo;
@@ -24,9 +22,6 @@ public class Fruta extends Elemento {
         Render.batch.end();
     }
     
-    /**
-     * Reubica la fruta a una nueva posiciÃ³n
-     */
     public void reubicar(float nuevaX, float nuevaY) {
         setPosicion(nuevaX, nuevaY);
     }
@@ -40,9 +35,6 @@ public class Fruta extends Elemento {
         return tipo.getPuntos();
     }
     
-    /**
-     * Libera recursos
-     */
     public void dispose() {
         if (imagen != null) {
             imagen.dispose();

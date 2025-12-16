@@ -9,6 +9,9 @@ public class ConfigJuego {
 	private Color colorCabeza;
 	private Color colorCuerpo;
 
+	// Nombre del jugador
+	private String nombreJugador = "Jugador";
+
 	// Configuración de audio
 	private float volumenMusica = 0.7f;
 	private float volumenSonidos = 1.0f;
@@ -20,25 +23,25 @@ public class ConfigJuego {
 		// Negro + Maroon (clásico LibGDX)
 		{Color.BLACK, Color.MAROON},
 		
-		// Verde suave + Verde medio (contraste natural con rosa)
+		// Verde suave + Verde medio
 		{new Color(0.25f, 0.60f, 0.40f, 1), new Color(0.45f, 0.75f, 0.55f, 1)},
 		
-		// Púrpura equilibrado + Púrpura suave (elegante con rosa)
+		// Púrpura equilibrado + Púrpura suave
 		{new Color(0.45f, 0.30f, 0.60f, 1), new Color(0.65f, 0.50f, 0.75f, 1)},
 		
-		// Azul medio + Azul suave (contraste fresco)
+		// Azul medio + Azul suave
 		{new Color(0.25f, 0.45f, 0.70f, 1), new Color(0.45f, 0.65f, 0.85f, 1)},
 		
-		// Rojo suave + Rosa fuerte (complementa el fondo)
+		// Rojo suave + Rosa fuerte
 		{new Color(0.70f, 0.25f, 0.35f, 1), new Color(0.85f, 0.45f, 0.55f, 1)},
 		
-		// Naranja cálido + Naranja suave (alegre pero no chillón)
+		// Naranja cálido + Naranja suave
 		{new Color(0.80f, 0.45f, 0.20f, 1), new Color(0.90f, 0.65f, 0.45f, 1)},
 		
-		// Turquesa moderado + Turquesa claro (vibrante pero suave)
+		// Turquesa moderado + Turquesa claro
 		{new Color(0.20f, 0.60f, 0.65f, 1), new Color(0.45f, 0.75f, 0.80f, 1)},
 		
-		// Dorado suave + Dorado claro (elegante)
+		// Dorado suave + Dorado claro
 		{new Color(0.75f, 0.60f, 0.25f, 1), new Color(0.90f, 0.80f, 0.50f, 1)}
 	};
 	
@@ -91,6 +94,17 @@ public class ConfigJuego {
 
 	public int getIndiceColorSeleccionado() {
 		return indiceColorSeleccionado;
+	}
+
+	// Métodos para nombre del jugador
+	public String getNombreJugador() {
+		return nombreJugador;
+	}
+
+	public void setNombreJugador(String nombre) {
+		if (nombre != null && !nombre.trim().isEmpty()) {
+			this.nombreJugador = nombre.trim();
+		}
 	}
 
 	// Métodos de audio

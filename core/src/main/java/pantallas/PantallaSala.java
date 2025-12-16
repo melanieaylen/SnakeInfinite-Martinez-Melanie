@@ -11,23 +11,23 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import elementos.Imagen;
 import elementos.Texto;
 import entradas.salidas.teclado.Entradas;
-import interfaces.ControladorJuegoMultijugador;
 import red.HiloCliente;
 import utiles.Config;
+import utiles.ConfigJuego;
 import utiles.Recursos;
 import utiles.Render;
 
-public class PantallaSala implements Screen, ControladorJuegoMultijugador {
+/**
+ * ✅ CORREGIDO: Nombres bien espaciados verticalmente
+ */
+public class PantallaSala implements Screen {
 
-    private final int TAMANIO_TEXTO = 80;
-    private final int TAMANIO_SUB = 50;
-    private final int TAMANIO_PEQUENO = 35;
-
-    // UI
     private Imagen fondo;
     private Texto titulo;
     private Texto textoEstado;
     private Texto textoJugador;
+    private Texto textoNombre;
+    private Texto textoJugadoresConectados;
     private Texto textoEspera;
     private Texto textoVolver;
     private Texto textoInfo;
@@ -37,73 +37,65 @@ public class PantallaSala implements Screen, ControladorJuegoMultijugador {
     private Viewport viewport;
     private Entradas entrada;
 
-    // RED
     private HiloCliente hiloCliente;
     private int miNumeroJugador = 0;
     private boolean conectado = false;
     private boolean juegoIniciado = false;
+    private boolean servidorLleno = false;
+    
+    private String[] nombresJugadores = new String[4];
+    private int cantidadJugadoresConectados = 0;
 
-    // ANIMACIÓN
     private float tiempo = 0;
     private float transparencia = 0;
     private int puntosAnimacion = 0;
 
     @Override
     public void show() {
-        // Inicializar UI
         fondo = new Imagen(Recursos.FONDO_MENU);
-        titulo = new Texto(Recursos.FUENTE, TAMANIO_TEXTO, Color.WHITE, Color.TEAL, -3, 3, false);
-        textoEstado = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.YELLOW, Color.BLACK, -4, 4, true);
-        textoJugador = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.SKY, Color.BLACK, -4, 4, true);
-        textoEspera = new Texto(Recursos.FUENTE, TAMANIO_SUB, Color.WHITE, Color.BLACK, -4, 4, true);
+        titulo = new Texto(Recursos.FUENTE, 80, Color.WHITE, Color.TEAL, -3, 3, false);
+        textoEstado = new Texto(Recursos.FUENTE, 50, Color.YELLOW, Color.BLACK, -4, 4, true);
+        textoJugador = new Texto(Recursos.FUENTE, 50, Color.SKY, Color.BLACK, -4, 4, true);
+        textoNombre = new Texto(Recursos.FUENTE, 45, Color.GREEN, Color.BLACK, -4, 4, true);
+        textoJugadoresConectados = new Texto(Recursos.FUENTE, 40, Color.WHITE, Color.BLACK, -4, 4, true);
+        textoEspera = new Texto(Recursos.FUENTE, 50, Color.WHITE, Color.BLACK, -4, 4, true);
         textoVolver = new Texto(Recursos.FUENTE, 40, Color.GRAY, Color.BLACK, -4, 4, true);
-        textoInfo = new Texto(Recursos.FUENTE, TAMANIO_PEQUENO, Color.CYAN, Color.BLACK, -3, 3, true);
+        textoInfo = new Texto(Recursos.FUENTE, 35, Color.CYAN, Color.BLACK, -3, 3, true);
 
-        // Configurar cámara
         camara = new OrthographicCamera();
         camara.setToOrtho(false, Config.ANCHO, Config.ALTO);
         viewport = new FitViewport(Config.ANCHO, Config.ALTO, camara);
 
-        // Configurar entrada
         entrada = new Entradas();
         Gdx.input.setInputProcessor(entrada);
 
-        // Música
         musica = Gdx.audio.newMusic(Gdx.files.internal(Recursos.MUSICA_MENU));
         musica.setLooping(true);
         musica.play();
 
-        // Iniciar cliente y conectar
         hiloCliente = new HiloCliente(this);
         hiloCliente.start();
         hiloCliente.conectar();
-
-        System.out.println("🔍 Buscando servidor...");
-        System.out.println("📋 INSTRUCCIONES DE TESTEO:");
-        System.out.println("   1. Ejecuta primero el SERVIDOR");
-        System.out.println("   2. Ejecuta DOS instancias del CLIENTE");
-        System.out.println("   3. Cuando ambos clientes estén conectados, el juego iniciará");
+        
+        for (int i = 0; i < 4; i++) {
+            nombresJugadores[i] = "";
+        }
     }
 
     @Override
     public void render(float delta) {
         Render.limpiarPantalla(0, 0, 0);
 
-        actualizarAnimaciones(delta);
-        procesarEntradas();
-
         if (juegoIniciado) {
-            // ⚠️ CRÍTICO: Crear la pantalla de juego y pasar el HiloCliente
+            System.out.println("🎮 juegoIniciado = true, creando PantallaJuegoMultijugador...");
             PantallaJuegoMultijugador pantallaJuego = new PantallaJuegoMultijugador(hiloCliente, miNumeroJugador);
-            
-            // ⚠️ NUEVO: Cambiar el controlador del HiloCliente a la nueva pantalla
-            hiloCliente.cambiarControlador(pantallaJuego);
-            
-            System.out.println("✅ Controlador cambiado a PantallaJuegoMultijugador");
-            
+            hiloCliente.cambiarAPantallaJuego(pantallaJuego);
             Render.app.setScreen(pantallaJuego);
             return;
         }
+
+        actualizarAnimaciones(delta);
+        procesarEntradas();
 
         viewport.apply();
         Render.batch.setProjectionMatrix(camara.combined);
@@ -112,38 +104,55 @@ public class PantallaSala implements Screen, ControladorJuegoMultijugador {
         fondo.setTransparencia(transparencia);
         fondo.dibujar();
 
-        // Título
         titulo.dibujarTexto("Multijugador", 350, 800);
 
-        // Estado de conexión
-        if (!conectado) {
-            textoEstado.dibujarTexto("Buscando servidor" + obtenerPuntos(), 400, 500);
-            textoInfo.dibujarTexto("Asegúrate de que el servidor esté ejecutándose", 300, 400);
+        if (servidorLleno) {
+            textoEstado.dibujarTexto("Servidor lleno (4/4 jugadores)", 320, 500);
+            textoInfo.dibujarTexto("Intenta conectarte más tarde", 420, 400);
+        } else if (!conectado) {
+            textoEstado.dibujarTexto("Buscando servidor" + obtenerPuntos(), 400, 550);
+            textoInfo.dibujarTexto("Asegúrate de que el servidor esté ejecutándose", 300, 450);
+            textoInfo.dibujarTexto("Tu nombre: " + ConfigJuego.getInstancia().getNombreJugador(), 420, 350);
         } else {
-            textoJugador.dibujarTexto("Conectado como Jugador " + miNumeroJugador, 350, 550);
-            textoEspera.dibujarTexto("Esperando rival" + obtenerPuntos(), 450, 450);
+            // Mostrar mi información
+            textoJugador.dibujarTexto("Eres: Jugador #" + miNumeroJugador, 500, 600);
+            textoNombre.dibujarTexto(ConfigJuego.getInstancia().getNombreJugador(), 530, 545);
             
-            // Info útil para testeo
-            if (miNumeroJugador == 1) {
-                textoInfo.dibujarTexto("Se necesita 1 jugador más para iniciar", 350, 350);
+            // ✅ CORREGIDO: Mostrar nombres bien espaciados
+            textoJugadoresConectados.dibujarTexto("Jugadores conectados:", 480, 470);
+            
+            int yInicial = 420; // Posición Y inicial
+            int espaciado = 40; // Espaciado entre cada nombre
+            
+            for (int i = 0; i < 4; i++) {
+                if (nombresJugadores[i] != null && !nombresJugadores[i].isEmpty()) {
+                    String linea = (i + 1) + ". " + nombresJugadores[i];
+                    int yActual = yInicial - (i * espaciado); // ✅ Calcular Y correctamente
+                    
+                    if (i + 1 == miNumeroJugador) {
+                        linea += " (Tú)";
+                        textoNombre.dibujarTexto(linea, 520, yActual);
+                    } else {
+                        textoJugadoresConectados.dibujarTexto(linea, 520, yActual);
+                    }
+                }
             }
+            
+            // ✅ Calcular posición Y correcta para el texto de espera
+            int yFinal = yInicial - (cantidadJugadoresConectados * espaciado) - 30;
+            textoEspera.dibujarTexto("Esperando jugadores" + obtenerPuntos(), 420, yFinal);
+            textoInfo.dibujarTexto("Mínimo 2 - Máximo 4 jugadores", 420, yFinal - 40);
         }
 
-        // Opción volver
         textoVolver.dibujarTexto("Presiona ESC para volver al menú", 350, 150);
 
         Render.batch.end();
     }
 
     private void actualizarAnimaciones(float delta) {
-        // Transparencia
         transparencia += 0.012f;
-        if (transparencia > 1) {
-            transparencia = 1;
-        }
-        fondo.setTransparencia(transparencia);
-
-        // Animación de puntos suspensivos
+        if (transparencia > 1) transparencia = 1;
+        
         tiempo += delta;
         if (tiempo > 0.5f) {
             tiempo = 0;
@@ -167,58 +176,70 @@ public class PantallaSala implements Screen, ControladorJuegoMultijugador {
         }
     }
 
-    // ===== IMPLEMENTACIÓN DE ControladorJuegoMultijugador =====
-
-    @Override
-    public void conectado(int numeroJugador) {
+    public void cuandoSeConecta(int numeroJugador) {
         this.miNumeroJugador = numeroJugador;
         this.conectado = true;
-        System.out.println("✅ Conectado como Jugador " + numeroJugador);
-        System.out.println("⏳ Esperando otro jugador...");
+        
+        String miNombre = ConfigJuego.getInstancia().getNombreJugador();
+        nombresJugadores[numeroJugador - 1] = miNombre;
+        cantidadJugadoresConectados = Math.max(cantidadJugadoresConectados, numeroJugador);
+        
+        System.out.println("✅ Conectado como J" + numeroJugador + ": " + miNombre);
     }
 
-    @Override
-    public void iniciarJuego() {
+    public void cuandoActualizanNombres(String datosNombres) {
+        System.out.println("👤 [Sala] Recibiendo nombres: " + datosNombres);
+        
+        if (datosNombres == null || datosNombres.isEmpty()) {
+            return;
+        }
+        
+        String[] nombres = datosNombres.split("\\|");
+        cantidadJugadoresConectados = 0;
+        
+        for (int i = 0; i < Math.min(nombres.length, 4); i++) {
+            if (nombres[i] != null && !nombres[i].trim().isEmpty()) {
+                nombresJugadores[i] = nombres[i].trim();
+                cantidadJugadoresConectados++;
+                System.out.println("   J" + (i + 1) + ": " + nombres[i].trim());
+            } else {
+                nombresJugadores[i] = "";
+            }
+        }
+    }
+
+    public void cuandoIniciaJuego() {
+        System.out.println("🎮 ¡MENSAJE 'INICIAR' RECIBIDO!");
         this.juegoIniciado = true;
-        System.out.println("🎮 ¡Ambos jugadores conectados! Iniciando partida...");
     }
 
-    @Override
-    public void actualizarPosicionSerpiente(int numeroJugador, float x, float y) {
-        // No usado en la sala
+    public void cuandoRivalSeDesconecta(int numeroJugador) {
+        if (numeroJugador > 0 && numeroJugador <= 4) {
+            System.out.println("⚠️ J" + numeroJugador + " (" + nombresJugadores[numeroJugador - 1] + ") se desconectó");
+            nombresJugadores[numeroJugador - 1] = "";
+            
+            cantidadJugadoresConectados = 0;
+            for (String nombre : nombresJugadores) {
+                if (nombre != null && !nombre.isEmpty()) {
+                    cantidadJugadoresConectados++;
+                }
+            }
+        }
     }
 
-    @Override
-    public void actualizarFrutas(String datosFrutas) {
-        // No usado en la sala
+    public void servidorLleno() {
+        this.servidorLleno = true;
+        
+        new Thread(() -> {
+            try {
+                Thread.sleep(3000);
+                Gdx.app.postRunnable(this::volverAlMenu);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
-    @Override
-    public void jugadorComio(int numeroJugador, int puntos) {
-        // No usado en la sala
-    }
-
-    @Override
-    public void jugadorMurio(int numeroJugador, int vidasRestantes) {
-        // No usado en la sala
-    }
-
-    @Override
-    public void actualizarPuntuacion(String datosPuntuacion) {
-        // No usado en la sala
-    }
-
-    @Override
-    public void finDelJuego(int ganador) {
-        // No usado en la sala
-    }
-
-    @Override
-    public void jugadorDesconectado(int numeroJugador) {
-        System.out.println("⚠️ Jugador " + numeroJugador + " se desconectó");
-    }
-
-    @Override
     public void volverAlMenu() {
         if (hiloCliente != null) {
             hiloCliente.desconectar();
@@ -233,12 +254,10 @@ public class PantallaSala implements Screen, ControladorJuegoMultijugador {
     }
 
     @Override
-    public void pause() {
-    }
+    public void pause() {}
 
     @Override
-    public void resume() {
-    }
+    public void resume() {}
 
     @Override
     public void hide() {
@@ -249,12 +268,12 @@ public class PantallaSala implements Screen, ControladorJuegoMultijugador {
 
     @Override
     public void dispose() {
-        if (musica != null) {
-            musica.dispose();
-        }
+        if (musica != null) musica.dispose();
         if (titulo != null) titulo.dispose();
         if (textoEstado != null) textoEstado.dispose();
         if (textoJugador != null) textoJugador.dispose();
+        if (textoNombre != null) textoNombre.dispose();
+        if (textoJugadoresConectados != null) textoJugadoresConectados.dispose();
         if (textoEspera != null) textoEspera.dispose();
         if (textoVolver != null) textoVolver.dispose();
         if (textoInfo != null) textoInfo.dispose();

@@ -1,51 +1,71 @@
 package red;
 
-import interfaces.ControladorJuegoMultijugador;
+import com.badlogic.gdx.Gdx;
 import elementos.Direcciones;
+import pantallas.PantallaJuegoMultijugador;
+import pantallas.PantallaSala;
+import utiles.ConfigJuego;
 
 import java.io.IOException;
 import java.net.*;
 
 /**
- * HiloCliente mejorado con modo de testeo local
+ * ✅ CON DEBUGGING COMPLETO PARA ENCONTRAR EL PROBLEMA
  */
 public class HiloCliente extends Thread {
 
     private DatagramSocket conexion;
     private int puertoServidor = 9998;
-    private String ipServidorStr;
     private InetAddress ipServidor;
     private boolean fin = false;
-    private ControladorJuegoMultijugador controlador;
     private boolean conectado = false;
     
-    // MODO DE TESTEO: true para testear en la misma computadora
+    private PantallaSala pantallaSala;
+    private PantallaJuegoMultijugador pantallaJuego;
+    private boolean estamosEnSala = true;
+    
     private static final boolean MODO_TESTEO_LOCAL = true;
+    
+    private long ultimoHeartbeat = 0;
+    private static final long INTERVALO_HEARTBEAT = 3000;
+    
+    private int mensajesRecibidos = 0;
+    private int miNumeroJugador = 0; // ✅ NUEVO
+    
+    // ✅ DEBUGGING: Contador de actualizaciones por jugador
+    private int[] actualizacionesPorJugador = new int[4];
 
-    public HiloCliente(ControladorJuegoMultijugador controlador) {
-        this.controlador = controlador;
-        
-        // Seleccionar IP según el modo
-        if (MODO_TESTEO_LOCAL) {
-            ipServidorStr = "127.0.0.1"; // Localhost para testeo
-            System.out.println("🔧 MODO TESTEO LOCAL - Conectando a localhost");
-        } else {
-            ipServidorStr = "255.255.255.255"; // Broadcast para red local
-            System.out.println("🌐 MODO RED LOCAL - Usando broadcast");
-        }
+    public HiloCliente(PantallaSala pantallaSala) {
+        this.pantallaSala = pantallaSala;
+        this.estamosEnSala = true;
+        inicializarSocket();
+    }
+
+    public void cambiarAPantallaJuego(PantallaJuegoMultijugador pantallaJuego) {
+        this.pantallaJuego = pantallaJuego;
+        this.estamosEnSala = false;
+        System.out.println("✅ [Cliente J" + miNumeroJugador + "] Cambiado a PantallaJuegoMultijugador");
+    }
+
+    private void inicializarSocket() {
+        String ipServidorStr = MODO_TESTEO_LOCAL ? "127.0.0.1" : "255.255.255.255";
         
         try {
             ipServidor = InetAddress.getByName(ipServidorStr);
             conexion = new DatagramSocket();
+            conexion.setReuseAddress(true);
             conexion.setSoTimeout(100);
             
             if (!MODO_TESTEO_LOCAL) {
-                conexion.setBroadcast(true); // Solo activar broadcast si no es local
+                conexion.setBroadcast(true);
             }
             
-            System.out.println("✅ Cliente inicializado en " + ipServidorStr);
-        } catch (SocketException | UnknownHostException e) {
-            System.err.println("❌ Error al inicializar cliente");
+            System.out.println("Cliente inicializado");
+            System.out.println("🌐 IP servidor: " + ipServidorStr);
+            System.out.println("🔌 Mi puerto: " + conexion.getLocalPort());
+            
+        } catch (Exception e) {
+            System.err.println("Error al inicializar cliente");
             e.printStackTrace();
         }
     }
@@ -53,159 +73,228 @@ public class HiloCliente extends Thread {
     @Override
     public void run() {
         System.out.println("👂 Cliente escuchando mensajes...");
-        do {
+        
+        while (!fin) {
+            enviarHeartbeatSiNecesario();
+            
             DatagramPacket paquete = new DatagramPacket(new byte[1024], 1024);
             try {
                 conexion.receive(paquete);
                 procesarMensaje(paquete);
             } catch (SocketTimeoutException e) {
-                // Timeout normal, continuar
+                // Timeout normal
             } catch (IOException e) {
                 if (!fin) {
                     System.err.println("⚠️ Error al recibir paquete");
                 }
             }
-        } while (!fin);
+        }
+        
         System.out.println("✅ Cliente detenido");
+    }
+    
+    private void enviarHeartbeatSiNecesario() {
+        if (!conectado) return;
+        
+        long ahora = System.currentTimeMillis();
+        if (ahora - ultimoHeartbeat > INTERVALO_HEARTBEAT) {
+            enviarMensaje("Heartbeat");
+            ultimoHeartbeat = ahora;
+        }
     }
 
     private void procesarMensaje(DatagramPacket paquete) {
         String mensaje = (new String(paquete.getData())).trim();
+        mensajesRecibidos++;
         
-        // ⚠️ NO hacer split aquí - cada caso maneja su propio formato
+        // ✅ DEBUGGING: Log de TODOS los mensajes cada 100
+        if (mensajesRecibidos % 100 == 0) {
+            System.out.println("📊 [Cliente J" + miNumeroJugador + "] Estadísticas:");
+            System.out.println("   Total mensajes recibidos: " + mensajesRecibidos);
+            System.out.println("   Actualizaciones de serpientes:");
+            for (int i = 0; i < 4; i++) {
+                if (actualizacionesPorJugador[i] > 0) {
+                    System.out.println("      J" + (i+1) + ": " + actualizacionesPorJugador[i] + " actualizaciones");
+                }
+            }
+        }
+        
+        // Log de mensajes importantes
+        if (!mensaje.startsWith("ActualizarSerpiente") && !mensaje.equals("Heartbeat")) {
+            System.out.println("📨 [Cliente J" + miNumeroJugador + " #" + mensajesRecibidos + "] " + 
+                             mensaje.substring(0, Math.min(80, mensaje.length())));
+        }
+        
+        if (mensaje.equals("Iniciar")) {
+            System.out.println("🎮 [Cliente J" + miNumeroJugador + "] ¡Recibido mensaje INICIAR!");
+            
+            if (estamosEnSala && pantallaSala != null) {
+                System.out.println("✅ Procesando inicio desde sala...");
+                Gdx.app.postRunnable(() -> {
+                    pantallaSala.cuandoIniciaJuego();
+                });
+            } else {
+                System.out.println("⚠️ Recibido 'Iniciar' pero no estamos en sala");
+            }
+            return;
+        }
+        
         if (mensaje.startsWith("Conectado:")) {
-            manejarConectado(paquete, mensaje);
-        } else if (mensaje.equals("YaConectado")) {
-            System.out.println("⚠️ Ya estás conectado al servidor");
-        } else if (mensaje.equals("Lleno")) {
-            System.out.println("⚠️ Servidor lleno (2/2 jugadores)");
-            controlador.volverAlMenu();
-        } else if (mensaje.equals("NoConectado")) {
-            System.out.println("⚠️ No estás conectado al servidor");
-        } else if (mensaje.equals("Iniciar")) {
-            System.out.println("🎮 Iniciando juego...");
-            controlador.iniciarJuego();
-        } else if (mensaje.startsWith("ActualizarSerpiente:")) {
-            manejarActualizacionSerpiente(mensaje);
-        } else if (mensaje.startsWith("ActualizarFrutas:")) {
-            String datos = mensaje.substring("ActualizarFrutas:".length());
-            controlador.actualizarFrutas(datos);
-        } else if (mensaje.startsWith("JugadorComio:")) {
-            String[] partes = mensaje.split(":");
-            if (partes.length >= 3) {
-                int numeroJugador = Integer.parseInt(partes[1]);
-                int puntos = Integer.parseInt(partes[2]);
-                controlador.jugadorComio(numeroJugador, puntos);
-            }
-        } else if (mensaje.startsWith("JugadorMurio:")) {
-            String[] partes = mensaje.split(":");
-            if (partes.length >= 3) {
-                int numeroJugador = Integer.parseInt(partes[1]);
-                int vidas = Integer.parseInt(partes[2]);
-                controlador.jugadorMurio(numeroJugador, vidas);
-            }
-        } else if (mensaje.startsWith("ActualizarPuntuacion:")) {
-            String datos = mensaje.substring("ActualizarPuntuacion:".length());
-            controlador.actualizarPuntuacion(datos);
-        } else if (mensaje.startsWith("JuegoTerminado:")) {
             String[] partes = mensaje.split(":");
             if (partes.length >= 2) {
-                int ganador = Integer.parseInt(partes[1]);
-                controlador.finDelJuego(ganador);
+                miNumeroJugador = Integer.parseInt(partes[1]); // ✅ GUARDAR MI NÚMERO
+                String nombre = partes.length >= 3 ? partes[2] : ("Jugador " + miNumeroJugador);
+                
+                if (!MODO_TESTEO_LOCAL) {
+                    this.ipServidor = paquete.getAddress();
+                }
+                this.conectado = true;
+                this.ultimoHeartbeat = System.currentTimeMillis();
+                
+                System.out.println("✅ Conectado como " + nombre + " (J" + miNumeroJugador + ")");
+                
+                if (estamosEnSala && pantallaSala != null) {
+                    Gdx.app.postRunnable(() -> pantallaSala.cuandoSeConecta(miNumeroJugador));
+                }
             }
+            
+        } else if (mensaje.startsWith("ActualizarSerpiente:")) {
+            if (!estamosEnSala && pantallaJuego != null) {
+                procesarActualizacionSerpiente(mensaje);
+            } else {
+                System.out.println("⚠️ [Cliente J" + miNumeroJugador + "] Recibida actualización de serpiente pero no estamos en juego");
+            }
+            
+        } else if (mensaje.startsWith("ActualizarFrutas:")) {
+            if (!estamosEnSala && pantallaJuego != null) {
+                String datos = mensaje.substring("ActualizarFrutas:".length());
+                Gdx.app.postRunnable(() -> pantallaJuego.cuandoActualizanFrutas(datos));
+            }
+            
+        } else if (mensaje.startsWith("ActualizarNombres:")) {
+            String datos = mensaje.substring("ActualizarNombres:".length());
+            
+            if (estamosEnSala && pantallaSala != null) {
+                Gdx.app.postRunnable(() -> pantallaSala.cuandoActualizanNombres(datos));
+            } 
+            
+        } else if (mensaje.startsWith("JugadorComio:")) {
+            if (!estamosEnSala && pantallaJuego != null) {
+                String[] partes = mensaje.split(":");
+                if (partes.length >= 3) {
+                    int numeroJugador = Integer.parseInt(partes[1]);
+                    int puntos = Integer.parseInt(partes[2]);
+                    System.out.println("🍎 [Cliente J" + miNumeroJugador + "] J" + numeroJugador + " comió (+" + puntos + " pts)");
+                    Gdx.app.postRunnable(() -> pantallaJuego.cuandoJugadorCome(numeroJugador, puntos));
+                }
+            }
+            
+        } else if (mensaje.startsWith("JugadorMurio:")) {
+            if (!estamosEnSala && pantallaJuego != null) {
+                String[] partes = mensaje.split(":");
+                if (partes.length >= 3) {
+                    int numeroJugador = Integer.parseInt(partes[1]);
+                    int vidas = Integer.parseInt(partes[2]);
+                    Gdx.app.postRunnable(() -> pantallaJuego.cuandoJugadorMuere(numeroJugador, vidas));
+                }
+            }
+            
+        } else if (mensaje.startsWith("ActualizarPuntuacion:")) {
+            if (!estamosEnSala && pantallaJuego != null) {
+                String datos = mensaje.substring("ActualizarPuntuacion:".length());
+                Gdx.app.postRunnable(() -> pantallaJuego.cuandoActualizanPuntaje(datos));
+            }
+            
+        } else if (mensaje.startsWith("JuegoTerminado:")) {
+            if (!estamosEnSala && pantallaJuego != null) {
+                String[] partes = mensaje.split(":");
+                if (partes.length >= 2) {
+                    int ganador = Integer.parseInt(partes[1]);
+                    Gdx.app.postRunnable(() -> pantallaJuego.cuandoTerminaJuego(ganador));
+                }
+            }
+            
         } else if (mensaje.startsWith("JugadorDesconectado:")) {
             String[] partes = mensaje.split(":");
             if (partes.length >= 2) {
                 int numeroJugador = Integer.parseInt(partes[1]);
-                controlador.jugadorDesconectado(numeroJugador);
+                
+                if (estamosEnSala && pantallaSala != null) {
+                    Gdx.app.postRunnable(() -> pantallaSala.cuandoRivalSeDesconecta(numeroJugador));
+                } else if (!estamosEnSala && pantallaJuego != null) {
+                    Gdx.app.postRunnable(() -> pantallaJuego.cuandoRivalSeDesconecta(numeroJugador));
+                }
             }
+            
         } else if (mensaje.equals("Desconectar")) {
-            System.out.println("🔌 Servidor desconectado");
-            controlador.volverAlMenu();
-        } else {
-            System.out.println("⚠️ Mensaje desconocido: " + mensaje);
-        }
-    }
-
-    private void manejarConectado(DatagramPacket paquete, String mensaje) {
-        // Formato: "Conectado:NUMERO"
-        String[] partes = mensaje.split(":");
-        if (partes.length >= 2) {
-            int numeroJugador = Integer.parseInt(partes[1]);
-            
-            // En modo local, no necesitamos cambiar la IP
-            if (!MODO_TESTEO_LOCAL) {
-                this.ipServidor = paquete.getAddress();
+            System.out.println("Servidor cerrado");
+            if (estamosEnSala && pantallaSala != null) {
+                Gdx.app.postRunnable(() -> pantallaSala.volverAlMenu());
+            } else if (!estamosEnSala && pantallaJuego != null) {
+                Gdx.app.postRunnable(() -> pantallaJuego.volverAlMenu());
             }
-            this.conectado = true;
             
-            System.out.println("✅ Conectado como Jugador " + numeroJugador);
-            controlador.conectado(numeroJugador);
+        } else if (mensaje.equals("Lleno")) {
+            System.out.println("Servidor lleno");
+            if (estamosEnSala && pantallaSala != null) {
+                Gdx.app.postRunnable(() -> pantallaSala.servidorLleno());
+            }
         }
     }
 
-    /**
-     * ⚠️ CORREGIDO: Procesa actualización completa de serpiente
-     * Formato esperado: "ActualizarSerpiente:NUMERO:x1:y1,x2:y2,x3:y3,..."
-     */
-    private void manejarActualizacionSerpiente(String mensaje) {
+    private void procesarActualizacionSerpiente(String mensaje) {
         try {
-            System.out.println("🔵 manejarActualizacionSerpiente:");
-            System.out.println("   - Mensaje completo: " + mensaje);
-            
-            // Remover el prefijo "ActualizarSerpiente:"
             String datos = mensaje.substring("ActualizarSerpiente:".length());
-            System.out.println("   - Datos sin prefijo: " + datos);
-            
-            // Separar número de jugador y segmentos
             int primerDosPuntos = datos.indexOf(':');
+            
             if (primerDosPuntos == -1) {
-                System.err.println("⚠️ Formato incorrecto - no se encontró ':' en: " + datos);
+                System.err.println("❌ [Cliente J" + miNumeroJugador + "] Formato inválido: " + mensaje);
                 return;
             }
             
-            String numeroStr = datos.substring(0, primerDosPuntos);
+            int numeroJugador = Integer.parseInt(datos.substring(0, primerDosPuntos));
             String segmentos = datos.substring(primerDosPuntos + 1);
             
-            System.out.println("   - Número jugador: " + numeroStr);
-            System.out.println("   - Segmentos: " + segmentos);
-            
-            int numeroJugador = Integer.parseInt(numeroStr);
-            
-            // Llamar al método correcto en PantallaJuegoMultijugador
-            if (controlador instanceof pantallas.PantallaJuegoMultijugador) {
-                System.out.println("   - Llamando a actualizarSerpienteCompleta...");
-                ((pantallas.PantallaJuegoMultijugador) controlador)
-                    .actualizarSerpienteCompleta(numeroJugador, segmentos);
-                System.out.println("   ✅ Actualización completada");
-            } else {
-                System.err.println("⚠️ Controlador no es instancia de PantallaJuegoMultijugador");
+            // ✅ DEBUGGING: Contar actualizaciones por jugador
+            if (numeroJugador >= 1 && numeroJugador <= 4) {
+                actualizacionesPorJugador[numeroJugador - 1]++;
+                
+                // Log cada 50 actualizaciones de MI serpiente
+                if (numeroJugador == miNumeroJugador && actualizacionesPorJugador[numeroJugador - 1] % 50 == 0) {
+                    System.out.println("📥 [Cliente J" + miNumeroJugador + "] Recibida actualización #" + 
+                                     actualizacionesPorJugador[numeroJugador - 1] + " de MI serpiente");
+                    System.out.println("   Datos: " + segmentos.substring(0, Math.min(100, segmentos.length())));
+                }
             }
+            
+            Gdx.app.postRunnable(() -> pantallaJuego.cuandoActualizanSerpiente(numeroJugador, segmentos));
+            
         } catch (Exception e) {
-            System.err.println("⚠️ Error al parsear actualización de serpiente: " + mensaje);
+            System.err.println("❌ [Cliente J" + miNumeroJugador + "] Error al parsear serpiente: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     public void enviarMensaje(String mensaje) {
         if (conexion == null || conexion.isClosed()) {
-            System.err.println("⚠️ Socket cerrado, no se puede enviar mensaje");
             return;
         }
 
-        byte[] datosMensaje = mensaje.getBytes();
-        DatagramPacket paquete = new DatagramPacket(datosMensaje, datosMensaje.length, ipServidor, puertoServidor);
+        byte[] datos = mensaje.getBytes();
+        DatagramPacket paquete = new DatagramPacket(datos, datos.length, ipServidor, puertoServidor);
+        
         try {
             conexion.send(paquete);
-            System.out.println("📤 Mensaje enviado: " + mensaje);
         } catch (IOException e) {
-            System.err.println("❌ Error al enviar mensaje: " + mensaje);
-            e.printStackTrace();
+            System.err.println("❌ Error al enviar: " + mensaje);
         }
     }
 
     public void conectar() {
-        enviarMensaje("Conectar");
+        String nombreJugador = ConfigJuego.getInstancia().getNombreJugador();
+        System.out.println("📤 Conectando como: " + nombreJugador);
+        enviarMensaje("Conectar:" + nombreJugador);
+        ultimoHeartbeat = System.currentTimeMillis();
     }
 
     public void mover(Direcciones direccion) {
@@ -223,22 +312,21 @@ public class HiloCliente extends Thread {
 
     public void terminar() {
         this.fin = true;
+        desconectar();
+        
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
         if (conexion != null && !conexion.isClosed()) {
             conexion.close();
         }
         this.interrupt();
-        System.out.println("✅ Cliente terminado");
     }
 
     public boolean estaConectado() {
         return conectado;
-    }
-    
-    /**
-     * ⚠️ NUEVO: Cambia el controlador (cuando pasamos de PantallaSala a PantallaJuegoMultijugador)
-     */
-    public void cambiarControlador(ControladorJuegoMultijugador nuevoControlador) {
-        this.controlador = nuevoControlador;
-        System.out.println("🔄 Controlador cambiado a: " + nuevoControlador.getClass().getSimpleName());
     }
 }

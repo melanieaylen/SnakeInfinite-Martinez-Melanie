@@ -2,10 +2,6 @@ package elementos;
 
 import jugadores.Jugador;
 
-/**
- * Estado del juego para sistema de pausa
- * Ahora usa la clase Jugador en vez de manejar todo directamente
- */
 public class EstadoJuego {
     
     private Jugador jugador;

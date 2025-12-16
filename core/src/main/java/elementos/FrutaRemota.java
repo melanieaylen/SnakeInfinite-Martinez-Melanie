@@ -1,11 +1,7 @@
-// ========== FrutaRemota.java ==========
 package elementos;
 
 import utiles.Render;
 
-/**
- * FrutaRemota - Versión de Fruta para renderizado en cliente multijugador
- */
 public class FrutaRemota {
     
     private float posX;
@@ -23,20 +19,14 @@ public class FrutaRemota {
         this.tipo = tipo;
         this.imagen = new Imagen(tipo.getRutaImagen());
     }
-    
-    /**
-     * Dibuja la fruta
-     */
+
     public void dibujar() {
         imagen.setParametros(posX, posY, ancho - 1, alto - 1);
         Render.batch.begin();
         imagen.dibujar();
         Render.batch.end();
     }
-    
-    /**
-     * Libera recursos
-     */
+
     public void dispose() {
         if (imagen != null) {
             imagen.dispose();

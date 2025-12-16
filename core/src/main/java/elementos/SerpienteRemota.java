@@ -6,13 +6,9 @@ import utiles.Render;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * SerpienteRemota - Versión de Serpiente para renderizado en cliente multijugador
- * Ahora dibuja todos los segmentos recibidos del servidor
- */
 public class SerpienteRemota {
     
-    private List<float[]> segmentos; // Lista de [x, y]
+    private List<float[]> segmentos;
     private int ancho;
     private int alto;
     private Color colorCabeza;
@@ -26,25 +22,16 @@ public class SerpienteRemota {
         this.colorCuerpo = colorCuerpo;
         this.segmentos = new ArrayList<>();
         
-        // Inicialmente solo tiene la cabeza
         segmentos.add(new float[]{posX, posY});
-        
-        System.out.println("🐍 SerpienteRemota creada en (" + posX + ", " + posY + ")");
     }
-    
-    /**
-     * Actualiza la posición de la serpiente con los datos del servidor
-     * @param datosSegmentos String en formato "x1:y1,x2:y2,x3:y3,..."
-     */
+
     public void actualizarSegmentos(String datosSegmentos) {
         if (datosSegmentos == null || datosSegmentos.isEmpty()) {
-            System.err.println("⚠️ datosSegmentos vacío o null");
             return;
         }
         
         segmentos.clear();
         
-        // Parsear los segmentos
         String[] segmentosStr = datosSegmentos.split(",");
         
         for (String segmentoStr : segmentosStr) {
@@ -55,22 +42,12 @@ public class SerpienteRemota {
                     float y = Float.parseFloat(coords[1]);
                     segmentos.add(new float[]{x, y});
                 } catch (NumberFormatException e) {
-                    System.err.println("⚠️ Error al parsear segmento: " + segmentoStr);
-                    e.printStackTrace();
+                    // Ignorar segmentos mal formateados
                 }
             }
         }
-        
-        // Debug: mostrar cuántos segmentos se parsearon
-        if (segmentos.size() > 0 && segmentos.size() <= 5) {
-            System.out.println("✅ Parseados " + segmentos.size() + " segmentos. Cabeza: (" + 
-                             segmentos.get(0)[0] + ", " + segmentos.get(0)[1] + ")");
-        }
     }
     
-    /**
-     * Actualiza solo la posición de la cabeza (compatibilidad)
-     */
     public void actualizarPosicion(float x, float y) {
         if (segmentos.isEmpty()) {
             segmentos.add(new float[]{x, y});
@@ -78,20 +55,15 @@ public class SerpienteRemota {
             segmentos.set(0, new float[]{x, y});
         }
     }
-    
-    /**
-     * Dibuja la serpiente completa
-     */
+
     public void dibujar() {
         if (segmentos.isEmpty()) {
-            System.err.println("⚠️ No hay segmentos para dibujar");
             return;
         }
         
         for (int i = 0; i < segmentos.size(); i++) {
             float[] segmento = segmentos.get(i);
             
-            // Cabeza en color especial
             if (i == 0) {
                 Render.shaper.setColor(colorCabeza);
             } else {
