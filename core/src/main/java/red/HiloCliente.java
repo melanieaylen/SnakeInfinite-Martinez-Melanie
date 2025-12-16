@@ -9,9 +9,6 @@ import utiles.ConfigJuego;
 import java.io.IOException;
 import java.net.*;
 
-/**
- * ✅ CON DEBUGGING COMPLETO PARA ENCONTRAR EL PROBLEMA
- */
 public class HiloCliente extends Thread {
 
     private DatagramSocket conexion;
@@ -30,10 +27,10 @@ public class HiloCliente extends Thread {
     private static final long INTERVALO_HEARTBEAT = 3000;
     
     private int mensajesRecibidos = 0;
-    private int miNumeroJugador = 0; // ✅ NUEVO
+    private int miNumeroJugador = 0;
     
-    // ✅ DEBUGGING: Contador de actualizaciones por jugador
-    private int[] actualizacionesPorJugador = new int[4];
+    // CAMBIO: Contador de actualizaciones para 2 jugadores
+    private int[] actualizacionesPorJugador = new int[2];
 
     public HiloCliente(PantallaSala pantallaSala) {
         this.pantallaSala = pantallaSala;
@@ -44,7 +41,7 @@ public class HiloCliente extends Thread {
     public void cambiarAPantallaJuego(PantallaJuegoMultijugador pantallaJuego) {
         this.pantallaJuego = pantallaJuego;
         this.estamosEnSala = false;
-        System.out.println("✅ [Cliente J" + miNumeroJugador + "] Cambiado a PantallaJuegoMultijugador");
+        System.out.println("[Cliente J" + miNumeroJugador + "] Cambiado a PantallaJuegoMultijugador");
     }
 
     private void inicializarSocket() {
@@ -61,8 +58,8 @@ public class HiloCliente extends Thread {
             }
             
             System.out.println("Cliente inicializado");
-            System.out.println("🌐 IP servidor: " + ipServidorStr);
-            System.out.println("🔌 Mi puerto: " + conexion.getLocalPort());
+            System.out.println("IP servidor: " + ipServidorStr);
+            System.out.println("Mi puerto: " + conexion.getLocalPort());
             
         } catch (Exception e) {
             System.err.println("Error al inicializar cliente");
@@ -72,7 +69,7 @@ public class HiloCliente extends Thread {
 
     @Override
     public void run() {
-        System.out.println("👂 Cliente escuchando mensajes...");
+        System.out.println("Cliente escuchando mensajes...");
         
         while (!fin) {
             enviarHeartbeatSiNecesario();
@@ -85,12 +82,12 @@ public class HiloCliente extends Thread {
                 // Timeout normal
             } catch (IOException e) {
                 if (!fin) {
-                    System.err.println("⚠️ Error al recibir paquete");
+                    System.err.println("Error al recibir paquete");
                 }
             }
         }
         
-        System.out.println("✅ Cliente detenido");
+        System.out.println("Cliente detenido");
     }
     
     private void enviarHeartbeatSiNecesario() {
@@ -107,12 +104,12 @@ public class HiloCliente extends Thread {
         String mensaje = (new String(paquete.getData())).trim();
         mensajesRecibidos++;
         
-        // ✅ DEBUGGING: Log de TODOS los mensajes cada 100
+        // DEBUGGING: Log cada 100 mensajes
         if (mensajesRecibidos % 100 == 0) {
-            System.out.println("📊 [Cliente J" + miNumeroJugador + "] Estadísticas:");
+            System.out.println("[Cliente J" + miNumeroJugador + "] Estadisticas:");
             System.out.println("   Total mensajes recibidos: " + mensajesRecibidos);
             System.out.println("   Actualizaciones de serpientes:");
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 2; i++) {
                 if (actualizacionesPorJugador[i] > 0) {
                     System.out.println("      J" + (i+1) + ": " + actualizacionesPorJugador[i] + " actualizaciones");
                 }
@@ -121,20 +118,20 @@ public class HiloCliente extends Thread {
         
         // Log de mensajes importantes
         if (!mensaje.startsWith("ActualizarSerpiente") && !mensaje.equals("Heartbeat")) {
-            System.out.println("📨 [Cliente J" + miNumeroJugador + " #" + mensajesRecibidos + "] " + 
+            System.out.println("[Cliente J" + miNumeroJugador + " #" + mensajesRecibidos + "] " + 
                              mensaje.substring(0, Math.min(80, mensaje.length())));
         }
         
         if (mensaje.equals("Iniciar")) {
-            System.out.println("🎮 [Cliente J" + miNumeroJugador + "] ¡Recibido mensaje INICIAR!");
+            System.out.println("[Cliente J" + miNumeroJugador + "] Recibido mensaje INICIAR!");
             
             if (estamosEnSala && pantallaSala != null) {
-                System.out.println("✅ Procesando inicio desde sala...");
+                System.out.println("Procesando inicio desde sala...");
                 Gdx.app.postRunnable(() -> {
                     pantallaSala.cuandoIniciaJuego();
                 });
             } else {
-                System.out.println("⚠️ Recibido 'Iniciar' pero no estamos en sala");
+                System.out.println("Recibido 'Iniciar' pero no estamos en sala");
             }
             return;
         }
@@ -142,7 +139,7 @@ public class HiloCliente extends Thread {
         if (mensaje.startsWith("Conectado:")) {
             String[] partes = mensaje.split(":");
             if (partes.length >= 2) {
-                miNumeroJugador = Integer.parseInt(partes[1]); // ✅ GUARDAR MI NÚMERO
+                miNumeroJugador = Integer.parseInt(partes[1]);
                 String nombre = partes.length >= 3 ? partes[2] : ("Jugador " + miNumeroJugador);
                 
                 if (!MODO_TESTEO_LOCAL) {
@@ -151,7 +148,7 @@ public class HiloCliente extends Thread {
                 this.conectado = true;
                 this.ultimoHeartbeat = System.currentTimeMillis();
                 
-                System.out.println("✅ Conectado como " + nombre + " (J" + miNumeroJugador + ")");
+                System.out.println("Conectado como " + nombre + " (J" + miNumeroJugador + ")");
                 
                 if (estamosEnSala && pantallaSala != null) {
                     Gdx.app.postRunnable(() -> pantallaSala.cuandoSeConecta(miNumeroJugador));
@@ -162,7 +159,7 @@ public class HiloCliente extends Thread {
             if (!estamosEnSala && pantallaJuego != null) {
                 procesarActualizacionSerpiente(mensaje);
             } else {
-                System.out.println("⚠️ [Cliente J" + miNumeroJugador + "] Recibida actualización de serpiente pero no estamos en juego");
+                System.out.println("[Cliente J" + miNumeroJugador + "] Recibida actualizacion de serpiente pero no estamos en juego");
             }
             
         } else if (mensaje.startsWith("ActualizarFrutas:")) {
@@ -184,7 +181,7 @@ public class HiloCliente extends Thread {
                 if (partes.length >= 3) {
                     int numeroJugador = Integer.parseInt(partes[1]);
                     int puntos = Integer.parseInt(partes[2]);
-                    System.out.println("🍎 [Cliente J" + miNumeroJugador + "] J" + numeroJugador + " comió (+" + puntos + " pts)");
+                    System.out.println("[Cliente J" + miNumeroJugador + "] J" + numeroJugador + " comio (+" + puntos + " pts)");
                     Gdx.app.postRunnable(() -> pantallaJuego.cuandoJugadorCome(numeroJugador, puntos));
                 }
             }
@@ -248,29 +245,27 @@ public class HiloCliente extends Thread {
             int primerDosPuntos = datos.indexOf(':');
             
             if (primerDosPuntos == -1) {
-                System.err.println("❌ [Cliente J" + miNumeroJugador + "] Formato inválido: " + mensaje);
+                System.err.println("[Cliente J" + miNumeroJugador + "] Formato invalido: " + mensaje);
                 return;
             }
             
             int numeroJugador = Integer.parseInt(datos.substring(0, primerDosPuntos));
             String segmentos = datos.substring(primerDosPuntos + 1);
             
-            // ✅ DEBUGGING: Contar actualizaciones por jugador
-            if (numeroJugador >= 1 && numeroJugador <= 4) {
+            // DEBUGGING: Contar actualizaciones
+            if (numeroJugador >= 1 && numeroJugador <= 2) {
                 actualizacionesPorJugador[numeroJugador - 1]++;
                 
-                // Log cada 50 actualizaciones de MI serpiente
                 if (numeroJugador == miNumeroJugador && actualizacionesPorJugador[numeroJugador - 1] % 50 == 0) {
-                    System.out.println("📥 [Cliente J" + miNumeroJugador + "] Recibida actualización #" + 
+                    System.out.println("[Cliente J" + miNumeroJugador + "] Recibida actualizacion #" + 
                                      actualizacionesPorJugador[numeroJugador - 1] + " de MI serpiente");
-                    System.out.println("   Datos: " + segmentos.substring(0, Math.min(100, segmentos.length())));
                 }
             }
             
             Gdx.app.postRunnable(() -> pantallaJuego.cuandoActualizanSerpiente(numeroJugador, segmentos));
             
         } catch (Exception e) {
-            System.err.println("❌ [Cliente J" + miNumeroJugador + "] Error al parsear serpiente: " + e.getMessage());
+            System.err.println("[Cliente J" + miNumeroJugador + "] Error al parsear serpiente: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -286,13 +281,13 @@ public class HiloCliente extends Thread {
         try {
             conexion.send(paquete);
         } catch (IOException e) {
-            System.err.println("❌ Error al enviar: " + mensaje);
+            System.err.println("Error al enviar: " + mensaje);
         }
     }
 
     public void conectar() {
         String nombreJugador = ConfigJuego.getInstancia().getNombreJugador();
-        System.out.println("📤 Conectando como: " + nombreJugador);
+        System.out.println("Conectando como: " + nombreJugador);
         enviarMensaje("Conectar:" + nombreJugador);
         ultimoHeartbeat = System.currentTimeMillis();
     }

@@ -18,7 +18,7 @@ import utiles.Recursos;
 import utiles.Render;
 
 /**
- * ✅ CORREGIDO: Nombres bien espaciados verticalmente
+ * ✅ ACTUALIZADA: Para 2 jugadores máximo
  */
 public class PantallaSala implements Screen {
 
@@ -43,7 +43,8 @@ public class PantallaSala implements Screen {
     private boolean juegoIniciado = false;
     private boolean servidorLleno = false;
     
-    private String[] nombresJugadores = new String[4];
+    // ✅ CAMBIO: Array para 2 jugadores
+    private String[] nombresJugadores = new String[2];
     private int cantidadJugadoresConectados = 0;
 
     private float tiempo = 0;
@@ -77,7 +78,7 @@ public class PantallaSala implements Screen {
         hiloCliente.start();
         hiloCliente.conectar();
         
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 2; i++) {
             nombresJugadores[i] = "";
         }
     }
@@ -87,7 +88,7 @@ public class PantallaSala implements Screen {
         Render.limpiarPantalla(0, 0, 0);
 
         if (juegoIniciado) {
-            System.out.println("🎮 juegoIniciado = true, creando PantallaJuegoMultijugador...");
+            System.out.println("juegoIniciado = true, creando PantallaJuegoMultijugador...");
             PantallaJuegoMultijugador pantallaJuego = new PantallaJuegoMultijugador(hiloCliente, miNumeroJugador);
             hiloCliente.cambiarAPantallaJuego(pantallaJuego);
             Render.app.setScreen(pantallaJuego);
@@ -107,30 +108,32 @@ public class PantallaSala implements Screen {
         titulo.dibujarTexto("Multijugador", 350, 800);
 
         if (servidorLleno) {
-            textoEstado.dibujarTexto("Servidor lleno (4/4 jugadores)", 320, 500);
-            textoInfo.dibujarTexto("Intenta conectarte más tarde", 420, 400);
+            // ✅ CAMBIO: Mensaje para 2 jugadores
+            textoEstado.dibujarTexto("Servidor lleno (2/2 jugadores)", 320, 500);
+            textoInfo.dibujarTexto("Intenta conectarte mas tarde", 420, 400);
         } else if (!conectado) {
             textoEstado.dibujarTexto("Buscando servidor" + obtenerPuntos(), 400, 550);
-            textoInfo.dibujarTexto("Asegúrate de que el servidor esté ejecutándose", 300, 450);
+            textoInfo.dibujarTexto("Asegurate de que el servidor este ejecutandose", 300, 450);
             textoInfo.dibujarTexto("Tu nombre: " + ConfigJuego.getInstancia().getNombreJugador(), 420, 350);
         } else {
             // Mostrar mi información
             textoJugador.dibujarTexto("Eres: Jugador #" + miNumeroJugador, 500, 600);
             textoNombre.dibujarTexto(ConfigJuego.getInstancia().getNombreJugador(), 530, 545);
             
-            // ✅ CORREGIDO: Mostrar nombres bien espaciados
+            // Mostrar jugadores conectados
             textoJugadoresConectados.dibujarTexto("Jugadores conectados:", 480, 470);
             
-            int yInicial = 420; // Posición Y inicial
-            int espaciado = 40; // Espaciado entre cada nombre
+            int yInicial = 420;
+            int espaciado = 40;
             
-            for (int i = 0; i < 4; i++) {
+            // ✅ CAMBIO: Iterar solo 2 jugadores
+            for (int i = 0; i < 2; i++) {
                 if (nombresJugadores[i] != null && !nombresJugadores[i].isEmpty()) {
                     String linea = (i + 1) + ". " + nombresJugadores[i];
-                    int yActual = yInicial - (i * espaciado); // ✅ Calcular Y correctamente
+                    int yActual = yInicial - (i * espaciado);
                     
                     if (i + 1 == miNumeroJugador) {
-                        linea += " (Tú)";
+                        linea += " (Tu)";
                         textoNombre.dibujarTexto(linea, 520, yActual);
                     } else {
                         textoJugadoresConectados.dibujarTexto(linea, 520, yActual);
@@ -138,13 +141,13 @@ public class PantallaSala implements Screen {
                 }
             }
             
-            // ✅ Calcular posición Y correcta para el texto de espera
             int yFinal = yInicial - (cantidadJugadoresConectados * espaciado) - 30;
             textoEspera.dibujarTexto("Esperando jugadores" + obtenerPuntos(), 420, yFinal);
-            textoInfo.dibujarTexto("Mínimo 2 - Máximo 4 jugadores", 420, yFinal - 40);
+            // ✅ CAMBIO: Texto actualizado para 2 jugadores
+            textoInfo.dibujarTexto("Se requieren 2 jugadores", 450, yFinal - 40);
         }
 
-        textoVolver.dibujarTexto("Presiona ESC para volver al menú", 350, 150);
+        textoVolver.dibujarTexto("Presiona ESC para volver al menu", 350, 150);
 
         Render.batch.end();
     }
@@ -184,11 +187,11 @@ public class PantallaSala implements Screen {
         nombresJugadores[numeroJugador - 1] = miNombre;
         cantidadJugadoresConectados = Math.max(cantidadJugadoresConectados, numeroJugador);
         
-        System.out.println("✅ Conectado como J" + numeroJugador + ": " + miNombre);
+        System.out.println("Conectado como J" + numeroJugador + ": " + miNombre);
     }
 
     public void cuandoActualizanNombres(String datosNombres) {
-        System.out.println("👤 [Sala] Recibiendo nombres: " + datosNombres);
+        System.out.println("[Sala] Recibiendo nombres: " + datosNombres);
         
         if (datosNombres == null || datosNombres.isEmpty()) {
             return;
@@ -197,7 +200,8 @@ public class PantallaSala implements Screen {
         String[] nombres = datosNombres.split("\\|");
         cantidadJugadoresConectados = 0;
         
-        for (int i = 0; i < Math.min(nombres.length, 4); i++) {
+        // ✅ CAMBIO: Procesar solo 2 jugadores
+        for (int i = 0; i < Math.min(nombres.length, 2); i++) {
             if (nombres[i] != null && !nombres[i].trim().isEmpty()) {
                 nombresJugadores[i] = nombres[i].trim();
                 cantidadJugadoresConectados++;
@@ -209,13 +213,13 @@ public class PantallaSala implements Screen {
     }
 
     public void cuandoIniciaJuego() {
-        System.out.println("🎮 ¡MENSAJE 'INICIAR' RECIBIDO!");
+        System.out.println("MENSAJE 'INICIAR' RECIBIDO!");
         this.juegoIniciado = true;
     }
 
     public void cuandoRivalSeDesconecta(int numeroJugador) {
-        if (numeroJugador > 0 && numeroJugador <= 4) {
-            System.out.println("⚠️ J" + numeroJugador + " (" + nombresJugadores[numeroJugador - 1] + ") se desconectó");
+        if (numeroJugador > 0 && numeroJugador <= 2) {
+            System.out.println("J" + numeroJugador + " (" + nombresJugadores[numeroJugador - 1] + ") se desconecto");
             nombresJugadores[numeroJugador - 1] = "";
             
             cantidadJugadoresConectados = 0;
